@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BUE Theatre Team website
 
-## Getting Started
+One website with two jobs: it runs the team's rehearsals and attendance behind a login, and it shows the team and its shows to the public.
 
-First, run the development server:
+- **Staff** (director and backstage share one role): workshops, session QR codes, attendance, absence and late forms, actor accounts, public content.
+- **Actors**: upcoming workshops, own attendance rate, QR check-in, absence and late forms.
+- **Public**: history, team, shows, free ticket reservations with a QR ticket, gallery.
+
+Requirements and designs were approved first; this repository is the build.
+
+## Stack
+
+Next.js 16 (App Router, TypeScript) · Supabase (database, login, file storage) · Vercel (hosting) · `qrcode` for QR images.
+
+Note: this Next.js version renames `middleware` to `proxy` and has other changes. Docs for the installed version are in `node_modules/next/dist/docs/`.
+
+## Status
+
+| Phase | State |
+| --- | --- |
+| 1-3 Requirements, requirements document, designs | Done |
+| 4 Project setup (this commit): structure, empty pages, database schema | Done |
+| 5 Build: login and roles, workshops and attendance, forms and emails, public site | Next |
+
+Every screen already has its route and shows a "not built yet" placeholder naming the design to build from.
+
+## Routes
+
+| Area | Routes |
+| --- | --- |
+| Public | `/`, `/history`, `/team`, `/shows`, `/shows/[id]`, `/shows/[id]/reserve`, `/ticket/[code]`, `/gallery` |
+| Login | `/login` |
+| Actor | `/actor`, `/actor/forms/new`, `/actor/scan` |
+| Staff | `/staff/workshops`, `/staff/sessions/[id]`, `/staff/forms`, `/staff/actors`, `/staff/content` |
+
+## Set up Supabase (once)
+
+1. In Supabase, create a new project. Pick a region close to Egypt, and save the database password.
+2. Open **SQL Editor > New query**, paste all of `supabase/migrations/0001_init.sql`, and run it.
+3. Open **Authentication > Users > Add user > Create new user**. Enter the director's email and a password, and tick **Auto Confirm User**.
+4. Open `supabase/first-staff-account.sql`, replace the name and email, and run it. This makes that user the first staff account.
+5. Open **Project Settings > API** and copy the Project URL, the publishable (anon) key and the secret (service role) key.
+
+## Run it on your computer
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local   # then paste the three Supabase values
+npm install
+npm run dev                  # http://localhost:3000
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Push this project to a GitHub repository.
+2. In Vercel: **Add New > Project**, import the repository, keep the default Next.js settings.
+3. Under **Environment Variables**, add the same variables as `.env.local`. Set `NEXT_PUBLIC_SITE_URL` to the Vercel address.
+4. Deploy. Every later push to `main` deploys automatically.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The service role key must only be added as a variable in Vercel. It must never be committed or shown in the browser.
+
+## Business rules (kept in `src/lib/rules.ts`)
+
+- Each actor has 2 excuses. A further accepted excuse counts as an absence, unless staff mark a third excuse as urgent.
+- Going over 2 absences (the 3rd) deactivates the account. Only staff can reactivate it.
+- A rejected form counts as an absence.
+- Late arrivals are recorded as late, with no limit and no penalty.
+- Attendance rate = (present + late) / all sessions. Excused and absent both lower it.
+- Forms can only be sent before the session starts.
+- Staff set three times per session: start, late-after and QR closes.
