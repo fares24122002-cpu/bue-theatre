@@ -731,3 +731,99 @@ a.list-row:hover {
   color: var(--accent);
   margin-bottom: 8px;
 }
+
+/* ---- Forms and notifications ---- */
+.badge-count {
+  display: inline-block;
+  min-width: 22px;
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 11px;
+  background: var(--accent);
+  color: var(--paper);
+  font-size: 13px;
+  text-align: center;
+}
+
+.select-field,
+.field select {
+  min-height: 52px;
+  padding: 0 12px;
+  border: 3px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  font: inherit;
+  font-size: 17px;
+}
+
+.field textarea {
+  width: 100%;
+}
+
+fieldset.field {
+  border: 0;
+}
+
+.choice-group legend {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.choice input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--accent);
+}
+
+.cards {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 24px;
+  border: 4px solid var(--ink);
+  line-height: 1.45;
+}
+
+.card-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  font-size: 20px;
+}
+
+.reason {
+  padding-left: 14px;
+  border-left: 4px solid var(--accent);
+  font-size: 17px;
+}
+
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.actions.tight {
+  margin: 0;
+}

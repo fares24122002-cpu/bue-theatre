@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { RoleGate } from "@/components/RoleGate";
+import { NotificationsLink } from "@/components/NotificationsLink";
 import { UserMenu } from "@/components/UserMenu";
 
 export default function ActorLayout({ children }: LayoutProps<"/actor">) {
@@ -14,6 +15,9 @@ export default function ActorLayout({ children }: LayoutProps<"/actor">) {
           <Link href="/actor">Dashboard</Link>
           <Link href="/actor/forms/new">Send a form</Link>
           <Link href="/actor/scan">Scan QR</Link>
+          <Suspense fallback={null}>
+            <NotificationsLink href="/actor/notifications" />
+          </Suspense>
           <Suspense fallback={null}>
             <UserMenu />
           </Suspense>

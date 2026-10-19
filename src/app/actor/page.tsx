@@ -10,12 +10,16 @@ import type { AttendanceStatus } from "@/lib/types";
 
 export const metadata: Metadata = { title: "My dashboard" };
 
-export default async function ActorDashboardPage() {
+export default async function ActorDashboardPage({
+  searchParams,
+}: PageProps<"/actor">) {
+  const sp = await searchParams;
+  const justSent = sp.sent === "1";
   await connection();
   const me = await requireRole("actor");
   const supabase = await createClient();
 
-  const [{ data: att }, { data: upcoming }] = await Promise.all([
+  const [{ data: att }, { data: upcoming }, { data: myForms }] = await Promise.all([
     supabase
       .from("attendance")
       .select("status, session:sessions(title,starts_at)")
@@ -26,6 +30,12 @@ export default async function ActorDashboardPage() {
       .eq("cancelled", false)
       .gte("closes_at", new Date().toISOString())
       .order("starts_at", { ascending: true })
+      .limit(10),
+    supabase
+      .from("forms")
+      .select("id,type,status,counted_as,session:sessions(title,starts_at)")
+      .eq("actor_id", me.id)
+      .order("created_at", { ascending: false })
       .limit(10),
   ]);
 
@@ -46,6 +56,11 @@ export default async function ActorDashboardPage() {
   return (
     <div className="container">
       <h1 className="display page-title">Hello, {me.full_name.split(" ")[0]}</h1>
+      {justSent ? (
+        <p className="form-ok" role="status">
+          Form sent. You will get a notification when staff review it.
+        </p>
+      ) : null}
 
       <section className="rate-grid" aria-label="My attendance">
         <div className="rate-card">
@@ -96,8 +111,54 @@ export default async function ActorDashboardPage() {
                 </span>
                 {s.notes ? <span className="muted">{s.notes}</span> : null}
               </span>
+              {new Date(s.starts_at).getTime() > Date.now() ? (
+                <Link href={`/actor/forms/new?session=${s.id}`} className="btn-outline">
+                  Can&apos;t make it?
+                </Link>
+              ) : null}
             </li>
           ))}
+        </ul>
+      )}
+
+      <h2 className="display section-title">My forms</h2>
+      {(myForms ?? []).length === 0 ? (
+        <p className="empty">You have not sent any forms.</p>
+      ) : (
+        <ul className="list">
+          {(myForms ?? []).map((f) => {
+            const s = Array.isArray(f.session) ? f.session[0] : f.session;
+            return (
+              <li key={f.id} className="list-row static">
+                <span className="list-date display">{s ? formatDay(s.starts_at) : ""}</span>
+                <span className="list-main">
+                  <strong>
+                    {f.type === "absence" ? "Absence form" : "Late form"}
+                    {s ? ` · ${s.title}` : ""}
+                  </strong>
+                  {f.status === "rejected" && f.type === "absence" ? (
+                    <span className="muted">Rejected: counts as an absence unless you attend.</span>
+                  ) : null}
+                  {f.status === "accepted" && f.counted_as ? (
+                    <span className="muted">
+                      Accepted: counted as {f.counted_as === "excuse" ? "an excuse" : "an absence"}.
+                    </span>
+                  ) : null}
+                </span>
+                <span
+                  className={
+                    f.status === "accepted"
+                      ? "chip chip-present"
+                      : f.status === "rejected"
+                        ? "chip chip-absent"
+                        : "chip"
+                  }
+                >
+                  {f.status === "pending" ? "Pending" : f.status === "accepted" ? "Accepted" : "Rejected"}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       )}
 

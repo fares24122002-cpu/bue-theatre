@@ -22,7 +22,8 @@ Note: this Next.js version renames `middleware` to `proxy` and has other changes
 | 4 Project setup (this commit): structure, empty pages, database schema | Done |
 | 5.1 Login, logout, staff and actor protection | Done |
 | 5.2 Workshops, QR attendance, actor dashboard | Done (run migration 0002) |
-| 5.3 Absence and late forms, notifications and emails | Next |
+| 5.3 Absence and late forms, staff review, in-site notifications | Done (run migration 0003) |
+| 5.3b Notification emails | Next (needs an email service account) |
 | 5.4 Public site: history, team, shows, reservations, gallery | Planned |
 
 Screens not built yet show a "not built yet" placeholder naming the design to build from.
@@ -40,13 +41,13 @@ Screens not built yet show a "not built yet" placeholder naming the design to bu
 | --- | --- |
 | Public | `/`, `/history`, `/team`, `/shows`, `/shows/[id]`, `/shows/[id]/reserve`, `/ticket/[code]`, `/gallery` |
 | Login | `/login` |
-| Actor | `/actor`, `/actor/forms/new`, `/actor/scan` (also opened by scanning the session QR with the phone camera: `/actor/scan?t=...`) |
-| Staff | `/staff/workshops`, `/staff/workshops/new`, `/staff/sessions/[id]`, `/staff/sessions/[id]/edit`, `/staff/sessions/[id]/qr`, `/staff/forms`, `/staff/actors`, `/staff/content` |
+| Actor | `/actor`, `/actor/forms/new`, `/actor/notifications`, `/actor/scan` (also opened by scanning the session QR with the phone camera: `/actor/scan?t=...`) |
+| Staff | `/staff/workshops`, `/staff/workshops/new`, `/staff/sessions/[id]`, `/staff/sessions/[id]/edit`, `/staff/sessions/[id]/qr`, `/staff/forms`, `/staff/notifications`, `/staff/actors`, `/staff/content` |
 
 ## Set up Supabase (once)
 
 1. In Supabase, create a new project. Pick a region close to Egypt, and save the database password.
-2. Open **SQL Editor > New query**, paste all of `supabase/migrations/0001_init.sql`, and run it. Then do the same for `0002_attendance.sql` (QR check-in, closing sessions, absence counting). Run the files in order, once each.
+2. Open **SQL Editor > New query**, paste all of `supabase/migrations/0001_init.sql`, and run it. Then do the same for `0002_attendance.sql` (QR check-in, closing sessions, absence counting) and `0003_forms.sql` (forms review and notifications). Run the files in order, once each.
 3. Open **Authentication > Users > Add user > Create new user**. Enter the director's email and a password, and tick **Auto Confirm User**.
 4. Open `supabase/first-staff-account.sql`, replace the name and email, and run it. This makes that user the first staff account.
 5. Open **Project Settings > API** and copy the Project URL, the publishable (anon) key and the secret (service role) key.
@@ -85,3 +86,12 @@ The service role key must only be added as a variable in Vercel. It must never b
 - `check_in()` in the database decides: before "late after" is present, until "QR closes" is late, after that refused. It only works from one hour before the start, and only for active actors. A second scan changes nothing.
 - Staff close a session after the QR closes. Everyone without a mark is then marked absent.
 - A trigger keeps each actor's excuse and absence counts in step with their attendance, and deactivates the account on the 3rd absence. Staff can correct any mark on the session page.
+
+## How forms work
+
+- An actor sends one form per workshop, before it starts: absence (reason) or late (reason and expected arrival). A late arrival after the QR closes must be an absence form instead.
+- Every staff member is notified of a new form. Staff accept or reject on `/staff/forms`, and the actor is notified of the decision.
+- Accepted absence: an excuse for the first 2, then an absence, unless staff tick "urgent". The actor's attendance for that workshop is set to excused or absent straight away.
+- Rejected absence: counts as an absence. If the actor does not scan in, closing the session marks them absent. If they attend and scan, they are present.
+- Late forms only inform staff. Late is recorded by the scan, with no limit and no penalty.
+- The rules live in the database function `review_form()` (migration 0003) and in `src/lib/rules.ts`.
