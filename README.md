@@ -26,7 +26,8 @@ Note: this Next.js version renames `middleware` to `proxy` and has other changes
 | 5.3b Notification emails | Later (needs an email service account) |
 | 5.4a Staff Actors page: create accounts, reactivate, new password | Done (run migration 0004) |
 | 5.4b Public site (history, team, shows, show page, gallery) and the staff content editor | Done |
-| 5.4c Reservations, QR tickets, door check-in | Planned |
+| 5.4c Reservations, QR tickets, bookings list, door check-in | Done (run migration 0005) |
+| 5.5 Emails (new form, decision, deactivation, ticket) | Next |
 | 5.4 Public site: history, team, shows, reservations, gallery | Planned |
 
 Screens not built yet show a "not built yet" placeholder naming the design to build from.
@@ -45,12 +46,12 @@ Screens not built yet show a "not built yet" placeholder naming the design to bu
 | Public | `/`, `/history`, `/team`, `/shows`, `/shows/[id]`, `/shows/[id]/reserve`, `/ticket/[code]`, `/gallery`, `/gallery/[id]` |
 | Login | `/login` |
 | Actor | `/actor`, `/actor/forms/new`, `/actor/notifications`, `/actor/scan` (also opened by scanning the session QR with the phone camera: `/actor/scan?t=...`) |
-| Staff | `/staff/workshops`, `/staff/workshops/new`, `/staff/sessions/[id]`, `/staff/sessions/[id]/edit`, `/staff/sessions/[id]/qr`, `/staff/forms`, `/staff/notifications`, `/staff/actors`, `/staff/content`, `/staff/content/team`, `/staff/content/shows` (+ `/new`, `/[id]`), `/staff/content/gallery` (+ `/[id]`) |
+| Staff | `/staff/workshops`, `/staff/workshops/new`, `/staff/sessions/[id]`, `/staff/sessions/[id]/edit`, `/staff/sessions/[id]/qr`, `/staff/forms`, `/staff/notifications`, `/staff/actors`, `/staff/content`, `/staff/content/team`, `/staff/content/shows` (+ `/new`, `/[id]`, `/[id]/bookings`, `/[id]/door`), `/staff/content/gallery` (+ `/[id]`) |
 
 ## Set up Supabase (once)
 
 1. In Supabase, create a new project. Pick a region close to Egypt, and save the database password.
-2. Open **SQL Editor > New query**, paste all of `supabase/migrations/0001_init.sql`, and run it. Then do the same for `0002_attendance.sql` (QR check-in, closing sessions, absence counting) `0003_forms.sql` (forms review and notifications) and `0004_actor_stats.sql` (totals for the Actors page). Run the files in order, once each.
+2. Open **SQL Editor > New query**, paste all of `supabase/migrations/0001_init.sql`, and run it. Then do the same for `0002_attendance.sql` (QR check-in, closing sessions, absence counting) `0003_forms.sql` (forms review and notifications) and `0004_actor_stats.sql` (totals for the Actors page) and `0005_reservations.sql` (ticket booking and door check-in). Run the files in order, once each.
 3. Open **Authentication > Users > Add user > Create new user**. Enter the director's email and a password, and tick **Auto Confirm User**.
 4. Open `supabase/first-staff-account.sql`, replace the name and email, and run it. This makes that user the first staff account.
 5. Open **Project Settings > API** and copy the Project URL, the publishable (anon) key and the secret (service role) key.
@@ -106,3 +107,10 @@ The service role key must only be added as a variable in Vercel. It must never b
 - A show is hidden until "Published" is ticked. Only published shows are visible and can be reserved.
 - Pictures are shrunk in the browser (long side 1800px) and uploaded to the public `media` bucket. Removing a picture from the site does not delete the file from storage.
 - Times are Cairo time, as for workshops.
+
+## How reservations work
+
+- A visitor opens a published show, chooses 1 up to the show's per-booking limit, and gives name, email (required) and phone (optional). No account.
+- The server calls the database function `book_tickets()` with the service role. It locks the show, then checks: published, not started, within the limit, the same email has not booked more than the limit in total for this show, and enough seats are left. Visitors cannot call it themselves.
+- The visitor lands on `/ticket/[code]`: the QR ticket, downloadable as a PNG. The link is the ticket (the code is a long random secret). Emailing the ticket comes with 5.5.
+- Staff see bookings per show, can mark arrival or cancel a booking, and check tickets in at the door by scanning the QR (or typing the code). A ticket for another show is refused, a second scan says "already checked in".

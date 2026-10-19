@@ -1356,3 +1356,49 @@ fieldset.field {
   font-size: 30px;
   margin-top: 32px;
 }
+
+/* ---- Reservations and tickets ---- */
+.narrow-section {
+  max-width: 760px;
+}
+
+.reserve-note {
+  margin: 8px 0 24px;
+}
+
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.ticket {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 28px;
+  border: 4px solid var(--ink);
+}
+
+.ticket-title {
+  font-size: clamp(48px, 9vw, 80px);
+}
+
+.ticket-who {
+  margin: 12px 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.mono {
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.08em;
+}
+
+.scan-result.warn .scan-status {
+  color: var(--ink);
+}
