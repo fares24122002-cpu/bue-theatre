@@ -31,7 +31,7 @@ Screens not built yet show a "not built yet" placeholder naming the design to bu
 
 - `src/proxy.ts` refreshes the login session and sends logged-out visitors from `/actor` and `/staff` to `/login`, then back to the page they wanted.
 - `src/lib/auth.ts` has `requireRole('staff' | 'actor')`. Every protected page, Server Action and Route Handler must call it near its data. The staff and actor layouts already wrap their pages in it.
-- Deactivated accounts cannot log in, and are signed out if they are deactivated while logged in.
+- Deactivated accounts cannot log in. If an account is deactivated while logged in, its next page load is blocked and sent to `/login` with a message.
 - Staff and actors who open the wrong area are sent to their own home.
 
 ## Routes
