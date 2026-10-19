@@ -188,3 +188,140 @@ a:hover {
   font-weight: 800;
   letter-spacing: 0.12em;
 }
+
+/* Buttons and menu items that look like nav links */
+.nav button {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.nav button:hover {
+  opacity: 0.75;
+}
+
+.user-name {
+  color: #bdbdbd;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Login screen */
+.login-grid {
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 640px;
+}
+
+.login-form-side {
+  flex: 1 1 420px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 64px var(--gutter);
+}
+
+.login-info-side {
+  flex: 1 1 420px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  padding: 64px var(--gutter);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 19px;
+  line-height: 1.5;
+}
+
+.login-info-side h2 {
+  font-size: 72px;
+}
+
+.login-info-side strong {
+  color: var(--accent-light);
+}
+
+.login-form {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login-form h1 {
+  font-size: 96px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field label {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.field input {
+  min-height: 52px;
+  padding: 0 16px;
+  border: 3px solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  font: inherit;
+  font-size: 17px;
+}
+
+.field input:focus-visible,
+.btn-primary:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  border: 0;
+  background: var(--accent);
+  color: var(--paper);
+  font-size: 32px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.form-error {
+  padding: 12px 16px;
+  border: 3px solid var(--accent);
+  color: var(--accent);
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.form-hint {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--muted);
+}

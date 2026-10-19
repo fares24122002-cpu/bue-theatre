@@ -20,9 +20,19 @@ Note: this Next.js version renames `middleware` to `proxy` and has other changes
 | --- | --- |
 | 1-3 Requirements, requirements document, designs | Done |
 | 4 Project setup (this commit): structure, empty pages, database schema | Done |
-| 5 Build: login and roles, workshops and attendance, forms and emails, public site | Next |
+| 5.1 Login, logout, staff and actor protection | Done |
+| 5.2 Workshops, QR attendance, actor dashboard | Next |
+| 5.3 Absence and late forms, notifications and emails | Planned |
+| 5.4 Public site: history, team, shows, reservations, gallery | Planned |
 
-Every screen already has its route and shows a "not built yet" placeholder naming the design to build from.
+Screens not built yet show a "not built yet" placeholder naming the design to build from.
+
+## How login and roles work
+
+- `src/proxy.ts` refreshes the login session and sends logged-out visitors from `/actor` and `/staff` to `/login`, then back to the page they wanted.
+- `src/lib/auth.ts` has `requireRole('staff' | 'actor')`. Every protected page, Server Action and Route Handler must call it near its data. The staff and actor layouts already wrap their pages in it.
+- Deactivated accounts cannot log in, and are signed out if they are deactivated while logged in.
+- Staff and actors who open the wrong area are sent to their own home.
 
 ## Routes
 

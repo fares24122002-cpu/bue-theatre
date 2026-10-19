@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { RoleGate } from "@/components/RoleGate";
+import { UserMenu } from "@/components/UserMenu";
 
 export default function ActorLayout({ children }: LayoutProps<"/actor">) {
   return (
@@ -11,10 +14,16 @@ export default function ActorLayout({ children }: LayoutProps<"/actor">) {
           <Link href="/actor">Dashboard</Link>
           <Link href="/actor/forms/new">Send a form</Link>
           <Link href="/actor/scan">Scan QR</Link>
-          <Link href="/login">Log out</Link>
+          <Suspense fallback={null}>
+            <UserMenu />
+          </Suspense>
         </nav>
       </header>
-      <main>{children}</main>
+      <main>
+        <Suspense fallback={<div className="container">Loading...</div>}>
+          <RoleGate role="actor">{children}</RoleGate>
+        </Suspense>
+      </main>
     </>
   );
 }
