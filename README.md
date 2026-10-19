@@ -21,8 +21,8 @@ Note: this Next.js version renames `middleware` to `proxy` and has other changes
 | 1-3 Requirements, requirements document, designs | Done |
 | 4 Project setup (this commit): structure, empty pages, database schema | Done |
 | 5.1 Login, logout, staff and actor protection | Done |
-| 5.2 Workshops, QR attendance, actor dashboard | Next |
-| 5.3 Absence and late forms, notifications and emails | Planned |
+| 5.2 Workshops, QR attendance, actor dashboard | Done (run migration 0002) |
+| 5.3 Absence and late forms, notifications and emails | Next |
 | 5.4 Public site: history, team, shows, reservations, gallery | Planned |
 
 Screens not built yet show a "not built yet" placeholder naming the design to build from.
@@ -40,13 +40,13 @@ Screens not built yet show a "not built yet" placeholder naming the design to bu
 | --- | --- |
 | Public | `/`, `/history`, `/team`, `/shows`, `/shows/[id]`, `/shows/[id]/reserve`, `/ticket/[code]`, `/gallery` |
 | Login | `/login` |
-| Actor | `/actor`, `/actor/forms/new`, `/actor/scan` |
-| Staff | `/staff/workshops`, `/staff/sessions/[id]`, `/staff/forms`, `/staff/actors`, `/staff/content` |
+| Actor | `/actor`, `/actor/forms/new`, `/actor/scan` (also opened by scanning the session QR with the phone camera: `/actor/scan?t=...`) |
+| Staff | `/staff/workshops`, `/staff/workshops/new`, `/staff/sessions/[id]`, `/staff/sessions/[id]/edit`, `/staff/sessions/[id]/qr`, `/staff/forms`, `/staff/actors`, `/staff/content` |
 
 ## Set up Supabase (once)
 
 1. In Supabase, create a new project. Pick a region close to Egypt, and save the database password.
-2. Open **SQL Editor > New query**, paste all of `supabase/migrations/0001_init.sql`, and run it.
+2. Open **SQL Editor > New query**, paste all of `supabase/migrations/0001_init.sql`, and run it. Then do the same for `0002_attendance.sql` (QR check-in, closing sessions, absence counting). Run the files in order, once each.
 3. Open **Authentication > Users > Add user > Create new user**. Enter the director's email and a password, and tick **Auto Confirm User**.
 4. Open `supabase/first-staff-account.sql`, replace the name and email, and run it. This makes that user the first staff account.
 5. Open **Project Settings > API** and copy the Project URL, the publishable (anon) key and the secret (service role) key.
@@ -77,3 +77,11 @@ The service role key must only be added as a variable in Vercel. It must never b
 - Attendance rate = (present + late) / all sessions. Excused and absent both lower it.
 - Forms can only be sent before the session starts.
 - Staff set three times per session: start, late-after and QR closes.
+
+## How attendance works
+
+- All times are entered and shown in Cairo time (`src/lib/time.ts`).
+- Each session has a QR code (a link to `/actor/scan?t=...`). The code is kept in a staff-only table, so actors cannot read it from the database.
+- `check_in()` in the database decides: before "late after" is present, until "QR closes" is late, after that refused. It only works from one hour before the start, and only for active actors. A second scan changes nothing.
+- Staff close a session after the QR closes. Everyone without a mark is then marked absent.
+- A trigger keeps each actor's excuse and absence counts in step with their attendance, and deactivates the account on the 3rd absence. Staff can correct any mark on the session page.
