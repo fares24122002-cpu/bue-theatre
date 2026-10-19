@@ -1,11 +1,8 @@
-import { Placeholder } from "@/components/Placeholder";
+import type { Metadata } from "next";
+import { TeamSection } from "@/components/public/Sections";
+
+export const metadata: Metadata = { title: "Meet the team" };
 
 export default function TeamPage() {
-  return (
-    <Placeholder
-      title="Meet the team"
-      description="Director, assistant director, backstage, media team and cast, in that order."
-      design="Public home page, 'Meet the team' section"
-    />
-  );
+  return <TeamSection heading="h1" />;
 }

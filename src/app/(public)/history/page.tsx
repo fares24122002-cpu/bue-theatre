@@ -1,11 +1,8 @@
-import { Placeholder } from "@/components/Placeholder";
+import type { Metadata } from "next";
+import { HistorySection } from "@/components/public/Sections";
+
+export const metadata: Metadata = { title: "Our story" };
 
 export default function HistoryPage() {
-  return (
-    <Placeholder
-      title="History"
-      description="The team's full story and milestones, edited by staff."
-      design="Public home page, 'Our story' section"
-    />
-  );
+  return <HistorySection heading="h1" />;
 }

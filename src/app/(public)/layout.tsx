@@ -1,8 +1,13 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { NextShowBar, SiteFooter } from "@/components/public/Sections";
 
 export default function PublicLayout({ children }: LayoutProps<"/">) {
   return (
     <>
+      <Suspense fallback={null}>
+        <NextShowBar />
+      </Suspense>
       <header className="site-header">
         <Link href="/" className="logo display">
           BUE THEATRE<span>.</span>
@@ -17,11 +22,19 @@ export default function PublicLayout({ children }: LayoutProps<"/">) {
           </Link>
         </nav>
       </header>
-      <main>{children}</main>
-      <footer className="site-footer">
-        <div>BUE Theatre Team · [Contact email] · [Instagram handle]</div>
-        <Link href="/login">ACTOR AND STAFF LOGIN</Link>
-      </footer>
+      <main>
+        <Suspense fallback={<div className="section">Loading...</div>}>{children}</Suspense>
+      </main>
+      <Suspense
+        fallback={
+          <footer className="site-footer">
+            <div>BUE Theatre Team</div>
+            <Link href="/login">ACTOR AND STAFF LOGIN</Link>
+          </footer>
+        }
+      >
+        <SiteFooter />
+      </Suspense>
     </>
   );
 }

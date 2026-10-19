@@ -1,11 +1,8 @@
-import { Placeholder } from "@/components/Placeholder";
+import type { Metadata } from "next";
+import { GallerySection } from "@/components/public/Sections";
+
+export const metadata: Metadata = { title: "Gallery" };
 
 export default function GalleryPage() {
-  return (
-    <Placeholder
-      title="Gallery"
-      description="Photo albums, one per show or event."
-      design="Public home page, 'Gallery' section"
-    />
-  );
+  return <GallerySection heading="h1" limit={60} />;
 }

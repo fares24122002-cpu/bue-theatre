@@ -25,7 +25,7 @@ Note: this Next.js version renames `middleware` to `proxy` and has other changes
 | 5.3 Absence and late forms, staff review, in-site notifications | Done (run migration 0003) |
 | 5.3b Notification emails | Later (needs an email service account) |
 | 5.4a Staff Actors page: create accounts, reactivate, new password | Done (run migration 0004) |
-| 5.4b Public site and content management | Next |
+| 5.4b Public site (history, team, shows, show page, gallery) and the staff content editor | Done |
 | 5.4c Reservations, QR tickets, door check-in | Planned |
 | 5.4 Public site: history, team, shows, reservations, gallery | Planned |
 
@@ -42,10 +42,10 @@ Screens not built yet show a "not built yet" placeholder naming the design to bu
 
 | Area | Routes |
 | --- | --- |
-| Public | `/`, `/history`, `/team`, `/shows`, `/shows/[id]`, `/shows/[id]/reserve`, `/ticket/[code]`, `/gallery` |
+| Public | `/`, `/history`, `/team`, `/shows`, `/shows/[id]`, `/shows/[id]/reserve`, `/ticket/[code]`, `/gallery`, `/gallery/[id]` |
 | Login | `/login` |
 | Actor | `/actor`, `/actor/forms/new`, `/actor/notifications`, `/actor/scan` (also opened by scanning the session QR with the phone camera: `/actor/scan?t=...`) |
-| Staff | `/staff/workshops`, `/staff/workshops/new`, `/staff/sessions/[id]`, `/staff/sessions/[id]/edit`, `/staff/sessions/[id]/qr`, `/staff/forms`, `/staff/notifications`, `/staff/actors`, `/staff/content` |
+| Staff | `/staff/workshops`, `/staff/workshops/new`, `/staff/sessions/[id]`, `/staff/sessions/[id]/edit`, `/staff/sessions/[id]/qr`, `/staff/forms`, `/staff/notifications`, `/staff/actors`, `/staff/content`, `/staff/content/team`, `/staff/content/shows` (+ `/new`, `/[id]`), `/staff/content/gallery` (+ `/[id]`) |
 
 ## Set up Supabase (once)
 
@@ -98,3 +98,11 @@ The service role key must only be added as a variable in Vercel. It must never b
 - Rejected absence: counts as an absence. If the actor does not scan in, closing the session marks them absent. If they attend and scan, they are present.
 - Late forms only inform staff. Late is recorded by the scan, with no limit and no penalty.
 - The rules live in the database function `review_form()` (migration 0003) and in `src/lib/rules.ts`.
+
+## How public content works
+
+- Visitors read through a cookie-less client (`src/lib/supabase/public.ts`), so they only ever see what the database rules allow: published shows and public content.
+- Staff edit everything under `/staff/content`: story, tagline and footer text, milestones, the team (five groups), shows with cast and crew, and gallery albums.
+- A show is hidden until "Published" is ticked. Only published shows are visible and can be reserved.
+- Pictures are shrunk in the browser (long side 1800px) and uploaded to the public `media` bucket. Removing a picture from the site does not delete the file from storage.
+- Times are Cairo time, as for workshops.
