@@ -23,7 +23,10 @@ Note: this Next.js version renames `middleware` to `proxy` and has other changes
 | 5.1 Login, logout, staff and actor protection | Done |
 | 5.2 Workshops, QR attendance, actor dashboard | Done (run migration 0002) |
 | 5.3 Absence and late forms, staff review, in-site notifications | Done (run migration 0003) |
-| 5.3b Notification emails | Next (needs an email service account) |
+| 5.3b Notification emails | Later (needs an email service account) |
+| 5.4a Staff Actors page: create accounts, reactivate, new password | Done (run migration 0004) |
+| 5.4b Public site and content management | Next |
+| 5.4c Reservations, QR tickets, door check-in | Planned |
 | 5.4 Public site: history, team, shows, reservations, gallery | Planned |
 
 Screens not built yet show a "not built yet" placeholder naming the design to build from.
@@ -47,7 +50,7 @@ Screens not built yet show a "not built yet" placeholder naming the design to bu
 ## Set up Supabase (once)
 
 1. In Supabase, create a new project. Pick a region close to Egypt, and save the database password.
-2. Open **SQL Editor > New query**, paste all of `supabase/migrations/0001_init.sql`, and run it. Then do the same for `0002_attendance.sql` (QR check-in, closing sessions, absence counting) and `0003_forms.sql` (forms review and notifications). Run the files in order, once each.
+2. Open **SQL Editor > New query**, paste all of `supabase/migrations/0001_init.sql`, and run it. Then do the same for `0002_attendance.sql` (QR check-in, closing sessions, absence counting) `0003_forms.sql` (forms review and notifications) and `0004_actor_stats.sql` (totals for the Actors page). Run the files in order, once each.
 3. Open **Authentication > Users > Add user > Create new user**. Enter the director's email and a password, and tick **Auto Confirm User**.
 4. Open `supabase/first-staff-account.sql`, replace the name and email, and run it. This makes that user the first staff account.
 5. Open **Project Settings > API** and copy the Project URL, the publishable (anon) key and the secret (service role) key.
