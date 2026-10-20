@@ -1,8 +1,6 @@
-import type { Metadata } from "next";
-import { ShowsSection } from "@/components/public/Sections";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Shows" };
-
-export default function ShowsPage() {
-  return <ShowsSection heading="h1" showPast />;
+/** The public site is one landing page now; old links lead there. */
+export default function Page() {
+  redirect("/");
 }

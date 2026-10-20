@@ -20,7 +20,7 @@ export default async function ReservePage({ params }: PageProps<"/shows/[id]/res
 
   return (
     <div className="section narrow-section">
-      <Link href={`/shows/${show.id}`} className="back-link">
+      <Link href={`/#show-${show.id}`} className="back-link">
         ← {show.title}
       </Link>
       <h1 className="section-h display">Reserve your seats</h1>

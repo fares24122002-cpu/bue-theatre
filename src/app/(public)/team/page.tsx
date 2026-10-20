@@ -1,8 +1,6 @@
-import type { Metadata } from "next";
-import { TeamSection } from "@/components/public/Sections";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Meet the team" };
-
-export default function TeamPage() {
-  return <TeamSection heading="h1" />;
+/** The public site is one landing page now; old links lead there. */
+export default function Page() {
+  redirect("/");
 }

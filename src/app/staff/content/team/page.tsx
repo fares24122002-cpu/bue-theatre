@@ -16,8 +16,8 @@ export default async function StaffTeamPage() {
     <div className="container">
       <h1 className="display page-title">Team</h1>
       <p className="lead">
-        Shown on the public Team page in this order: director, assistant director,
-        backstage, media team, cast. Inside a group, people are sorted by the
+        Shown on the public site in this order: director, assistant director,
+        president, vice president, backstage, media team, cast. Inside a group, people are sorted by the
         order number, then by name.
       </p>
 

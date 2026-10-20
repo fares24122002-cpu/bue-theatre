@@ -1,8 +1,6 @@
-import type { Metadata } from "next";
-import { GallerySection } from "@/components/public/Sections";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = { title: "Gallery" };
-
-export default function GalleryPage() {
-  return <GallerySection heading="h1" limit={60} />;
+/** The public site is one landing page now; old links lead there. */
+export default function Page() {
+  redirect("/");
 }

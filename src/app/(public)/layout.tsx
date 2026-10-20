@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { NextShowBar, SiteFooter } from "@/components/public/Sections";
 
+/** Public pages have no menu: one landing page, plus the reservation and ticket pages. */
 export default function PublicLayout({ children }: LayoutProps<"/">) {
   return (
     <>
@@ -12,15 +13,6 @@ export default function PublicLayout({ children }: LayoutProps<"/">) {
         <Link href="/" className="logo display">
           BUE THEATRE<span>.</span>
         </Link>
-        <nav className="nav" aria-label="Main">
-          <Link href="/history">History</Link>
-          <Link href="/team">Team</Link>
-          <Link href="/shows">Shows</Link>
-          <Link href="/gallery">Gallery</Link>
-          <Link href="/login" className="nav-button">
-            Log in
-          </Link>
-        </nav>
       </header>
       <main>
         <Suspense fallback={<div className="section">Loading...</div>}>{children}</Suspense>

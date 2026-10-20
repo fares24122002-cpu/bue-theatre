@@ -43,7 +43,7 @@ Screens not built yet show a "not built yet" placeholder naming the design to bu
 
 | Area | Routes |
 | --- | --- |
-| Public | `/`, `/history`, `/team`, `/shows`, `/shows/[id]`, `/shows/[id]/reserve`, `/ticket/[code]`, `/gallery`, `/gallery/[id]` |
+| Public | `/` (the whole public site on one page), `/shows/[id]/reserve`, `/ticket/[code]`. Old `/history`, `/team`, `/shows`, `/gallery` links redirect to `/`. |
 | Login | `/login` |
 | Actor | `/actor`, `/actor/forms/new`, `/actor/notifications`, `/actor/scan` (also opened by scanning the session QR with the phone camera: `/actor/scan?t=...`) |
 | Staff | `/staff/workshops`, `/staff/workshops/new`, `/staff/sessions/[id]`, `/staff/sessions/[id]/edit`, `/staff/sessions/[id]/qr`, `/staff/forms`, `/staff/notifications`, `/staff/actors`, `/staff/content`, `/staff/content/team`, `/staff/content/shows` (+ `/new`, `/[id]`, `/[id]/bookings`, `/[id]/door`), `/staff/content/gallery` (+ `/[id]`) |
@@ -51,7 +51,7 @@ Screens not built yet show a "not built yet" placeholder naming the design to bu
 ## Set up Supabase (once)
 
 1. In Supabase, create a new project. Pick a region close to Egypt, and save the database password.
-2. Open **SQL Editor > New query**, paste all of `supabase/migrations/0001_init.sql`, and run it. Then do the same for `0002_attendance.sql` (QR check-in, closing sessions, absence counting) `0003_forms.sql` (forms review and notifications) and `0004_actor_stats.sql` (totals for the Actors page) `0005_reservations.sql` (ticket booking and door check-in) and `0006_account_notifications.sql` (notifications when an account is deactivated or reactivated). Run the files in order, once each.
+2. Open **SQL Editor > New query**, paste all of `supabase/migrations/0001_init.sql`, and run it. Then do the same for `0002_attendance.sql` (QR check-in, closing sessions, absence counting) `0003_forms.sql` (forms review and notifications) and `0004_actor_stats.sql` (totals for the Actors page) `0005_reservations.sql` (ticket booking and door check-in) and `0006_account_notifications.sql` (notifications when an account is deactivated or reactivated) and `0007_team_groups.sql` (President and Vice president on the team). Run the files in order, once each.
 3. Open **Authentication > Users > Add user > Create new user**. Enter the director's email and a password, and tick **Auto Confirm User**.
 4. Open `supabase/first-staff-account.sql`, replace the name and email, and run it. This makes that user the first staff account.
 5. Open **Project Settings > API** and copy the Project URL, the publishable (anon) key and the secret (service role) key.
@@ -121,3 +121,7 @@ The service role key must only be added as a variable in Vercel. It must never b
 - Settings (Vercel > Settings > Environment Variables, then redeploy): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`. A free Gmail account works: turn on 2-step verification, create an App password, use `smtp.gmail.com`, port `465`. Resend (`RESEND_API_KEY`, `EMAIL_FROM`) is supported too but only emails strangers from a verified domain.
 - Without these settings the site works exactly the same and simply sends no email.
 - Code: `src/lib/email.ts` (sending, templates), `src/lib/notify.ts` (sends after the response so pages stay fast). Each notification is claimed before sending so nobody gets two copies.
+
+## Public site layout
+
+The public site has no menu. It is one landing page: our story, the team (director, assistant director, president, vice president, backstage, media team, cast), upcoming shows with all their details, and the gallery (albums open in place). The only other pages a visitor reaches are the reservation form and their ticket. The footer keeps the "Actor and staff login" link.

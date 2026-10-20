@@ -156,3 +156,23 @@ export async function getAlbum(id: string): Promise<{ album: Album; photos: Phot
     .order("sort_order", { ascending: true });
   return { album: album as Album, photos: (photos ?? []) as Photo[] };
 }
+
+/** Recent albums with their photos, for the single-page gallery. */
+export async function getAlbumsWithPhotos(
+  albumLimit = 12,
+  photoLimit = 60,
+): Promise<{ album: Album; photos: Photo[] }[]> {
+  const albums = await getAlbums(albumLimit);
+  const client = createPublicClient();
+  return Promise.all(
+    albums.map(async (album) => {
+      const { data } = await client
+        .from("photos")
+        .select("id,album_id,url,sort_order")
+        .eq("album_id", album.id)
+        .order("sort_order", { ascending: true })
+        .limit(photoLimit);
+      return { album, photos: (data ?? []) as Photo[] };
+    }),
+  );
+}

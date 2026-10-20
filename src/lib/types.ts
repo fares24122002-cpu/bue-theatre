@@ -9,6 +9,8 @@ export type FormCountedAs = "excuse" | "absence";
 export type TeamGroup =
   | "director"
   | "assistant_director"
+  | "president"
+  | "vice_president"
   | "backstage"
   | "media"
   | "cast";
@@ -17,6 +19,8 @@ export type TeamGroup =
 export const TEAM_GROUP_ORDER: TeamGroup[] = [
   "director",
   "assistant_director",
+  "president",
+  "vice_president",
   "backstage",
   "media",
   "cast",
@@ -25,6 +29,8 @@ export const TEAM_GROUP_ORDER: TeamGroup[] = [
 export const TEAM_GROUP_LABEL: Record<TeamGroup, string> = {
   director: "Director",
   assistant_director: "Assistant director",
+  president: "President",
+  vice_president: "Vice president",
   backstage: "Backstage",
   media: "Media team",
   cast: "Cast",

@@ -7,11 +7,12 @@ import {
   TeamSection,
 } from "@/components/public/Sections";
 
+/** The whole public site on one page: history, team, shows, gallery. */
 export default function HomePage() {
   return (
     <>
       <Suspense fallback={null}>
-        <HistorySection heading="h1" />
+        <HistorySection />
       </Suspense>
       <Suspense fallback={null}>
         <TeamSection />

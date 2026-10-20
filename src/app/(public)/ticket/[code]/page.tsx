@@ -65,8 +65,8 @@ export default async function TicketPage({ params }: PageProps<"/ticket/[code]">
           tickets={res.tickets}
           code={code}
         />
-        <Link href={`/shows/${show.id}`} className="btn-outline">
-          Back to the show
+        <Link href={`/#show-${show.id}`} className="btn-outline">
+          Back to the site
         </Link>
       </div>
       <p className="form-hint">

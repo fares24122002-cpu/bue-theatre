@@ -38,7 +38,7 @@ export default async function EditShowPage({
       <h1 className="display page-title">{show.title}</h1>
       <p className="actions tight">
         {show.published ? (
-          <Link href={`/shows/${show.id}`} className="map-link">
+          <Link href={`/#show-${show.id}`} className="map-link">
             View the public page →
           </Link>
         ) : null}
