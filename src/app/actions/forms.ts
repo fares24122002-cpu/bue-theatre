@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
+import { queueNotificationEmails } from "@/lib/notify";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/action-state";
 import { isTime, toTimeInput } from "@/lib/time";
@@ -61,6 +62,7 @@ export async function sendForm(
     return { error: "Could not send the form. Try again." };
   }
 
+  await queueNotificationEmails();
   revalidatePath("/actor");
   redirect("/actor?sent=1");
 }
@@ -85,6 +87,7 @@ export async function reviewForm(
   });
   if (error) return { error: error.message };
 
+  await queueNotificationEmails();
   revalidatePath("/staff/forms");
   return { message: decision === "accept" ? "Accepted." : "Rejected." };
 }

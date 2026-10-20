@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
+import { queueNotificationEmails } from "@/lib/notify";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/action-state";
 import { cairoToDate, isDate, isTime } from "@/lib/time";
@@ -97,6 +98,7 @@ export async function closeSession(
     p_session: sessionId,
   });
   if (error) return { error: error.message };
+  await queueNotificationEmails();
   revalidatePath(`/staff/sessions/${sessionId}`);
   const n = typeof data === "number" ? data : 0;
   return {
@@ -125,5 +127,6 @@ export async function setAttendance(formData: FormData): Promise<void> {
     },
     { onConflict: "session_id,actor_id" },
   );
+  await queueNotificationEmails();
   revalidatePath(`/staff/sessions/${sessionId}`);
 }

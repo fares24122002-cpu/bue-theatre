@@ -27,7 +27,7 @@ Note: this Next.js version renames `middleware` to `proxy` and has other changes
 | 5.4a Staff Actors page: create accounts, reactivate, new password | Done (run migration 0004) |
 | 5.4b Public site (history, team, shows, show page, gallery) and the staff content editor | Done |
 | 5.4c Reservations, QR tickets, bookings list, door check-in | Done (run migration 0005) |
-| 5.5 Emails (new form, decision, deactivation, ticket) | Next |
+| 5.5 Emails: ticket, new form, decision, account changes | Done (run migration 0006, then add the SMTP settings in Vercel) |
 | 5.4 Public site: history, team, shows, reservations, gallery | Planned |
 
 Screens not built yet show a "not built yet" placeholder naming the design to build from.
@@ -51,7 +51,7 @@ Screens not built yet show a "not built yet" placeholder naming the design to bu
 ## Set up Supabase (once)
 
 1. In Supabase, create a new project. Pick a region close to Egypt, and save the database password.
-2. Open **SQL Editor > New query**, paste all of `supabase/migrations/0001_init.sql`, and run it. Then do the same for `0002_attendance.sql` (QR check-in, closing sessions, absence counting) `0003_forms.sql` (forms review and notifications) and `0004_actor_stats.sql` (totals for the Actors page) and `0005_reservations.sql` (ticket booking and door check-in). Run the files in order, once each.
+2. Open **SQL Editor > New query**, paste all of `supabase/migrations/0001_init.sql`, and run it. Then do the same for `0002_attendance.sql` (QR check-in, closing sessions, absence counting) `0003_forms.sql` (forms review and notifications) and `0004_actor_stats.sql` (totals for the Actors page) `0005_reservations.sql` (ticket booking and door check-in) and `0006_account_notifications.sql` (notifications when an account is deactivated or reactivated). Run the files in order, once each.
 3. Open **Authentication > Users > Add user > Create new user**. Enter the director's email and a password, and tick **Auto Confirm User**.
 4. Open `supabase/first-staff-account.sql`, replace the name and email, and run it. This makes that user the first staff account.
 5. Open **Project Settings > API** and copy the Project URL, the publishable (anon) key and the secret (service role) key.
@@ -114,3 +114,10 @@ The service role key must only be added as a variable in Vercel. It must never b
 - The server calls the database function `book_tickets()` with the service role. It locks the show, then checks: published, not started, within the limit, the same email has not booked more than the limit in total for this show, and enough seats are left. Visitors cannot call it themselves.
 - The visitor lands on `/ticket/[code]`: the QR ticket, downloadable as a PNG. The link is the ticket (the code is a long random secret). Emailing the ticket comes with 5.5.
 - Staff see bookings per show, can mark arrival or cancel a booking, and check tickets in at the door by scanning the QR (or typing the code). A ticket for another show is refused, a second scan says "already checked in".
+
+## How emails work
+
+- Every in-site notification is also emailed (new form to staff, form decision, account deactivated or reactivated), and every reservation emails the ticket with its QR code. Staff can resend a ticket from the Bookings page.
+- Settings (Vercel > Settings > Environment Variables, then redeploy): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`. A free Gmail account works: turn on 2-step verification, create an App password, use `smtp.gmail.com`, port `465`. Resend (`RESEND_API_KEY`, `EMAIL_FROM`) is supported too but only emails strangers from a verified domain.
+- Without these settings the site works exactly the same and simply sends no email.
+- Code: `src/lib/email.ts` (sending, templates), `src/lib/notify.ts` (sends after the response so pages stay fast). Each notification is claimed before sending so nobody gets two copies.

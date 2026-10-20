@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { cancelReservation, setCheckedIn } from "@/app/actions/reservations";
+import { cancelReservation, resendTicket, setCheckedIn } from "@/app/actions/reservations";
 import { ActionButton } from "@/components/ActionButton";
 import { createClient } from "@/lib/supabase/server";
 import { formatDay, formatTime } from "@/lib/time";
@@ -68,6 +68,10 @@ export default async function BookingsPage({ params }: PageProps<"/staff/content
                 <ActionButton
                   action={setCheckedIn.bind(null, r.id, id, !r.checked_in)}
                   label={r.checked_in ? "Undo arrived" : "Mark arrived"}
+                />
+                <ActionButton
+                  action={resendTicket.bind(null, r.ticket_code)}
+                  label="Email ticket again"
                 />
                 <ActionButton
                   action={cancelReservation.bind(null, r.id, id)}

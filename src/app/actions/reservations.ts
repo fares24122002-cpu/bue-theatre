@@ -1,11 +1,14 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/action-state";
+import { sendTicketEmail } from "@/lib/email";
+import { getSiteUrl } from "@/lib/site";
 
 const text = (v: FormDataEntryValue | null) =>
   typeof v === "string" ? v.trim() : "";
@@ -56,6 +59,9 @@ export async function reserve(
           : "Could not complete the reservation. Try again.",
     };
   }
+
+  const siteUrl = await getSiteUrl();
+  after(() => sendTicketEmail(data, siteUrl));
 
   revalidatePath(`/shows/${showId}`);
   redirect(`/ticket/${data}`);
@@ -115,4 +121,17 @@ export async function doorCheckIn(code: string, showId: string): Promise<DoorRes
   const r = data as { name: string; tickets: number; already: boolean };
   revalidatePath(`/staff/content/shows/${showId}/bookings`);
   return { ok: true, name: r.name, tickets: r.tickets, already: r.already };
+}
+
+/** Staff send a visitor's ticket email again (lost it, typo fixed, etc.). */
+export async function resendTicket(
+  code: string,
+  _prev: ActionState,
+  _fd: FormData,
+): Promise<ActionState> {
+  await requireRole("staff");
+  const { emailConfigured } = await import("@/lib/email");
+  if (!emailConfigured()) return { error: "Emails are not set up yet." };
+  const ok = await sendTicketEmail(code, await getSiteUrl());
+  return ok ? { message: "Ticket email sent." } : { error: "Could not send the email. Try again." };
 }

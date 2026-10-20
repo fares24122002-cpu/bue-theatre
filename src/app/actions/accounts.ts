@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
+import { queueNotificationEmails } from "@/lib/notify";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ActionState } from "@/lib/action-state";
 
@@ -76,6 +77,7 @@ export async function setActive(
     .update({ active })
     .eq("id", profileId);
   if (error) return { error: "Could not update the account. Try again." };
+  await queueNotificationEmails();
   revalidatePath("/staff/actors");
   return {};
 }
