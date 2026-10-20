@@ -130,8 +130,10 @@ export async function resendTicket(
   _fd: FormData,
 ): Promise<ActionState> {
   await requireRole("staff");
-  const { emailConfigured } = await import("@/lib/email");
+  const { emailConfigured, getLastEmailError } = await import("@/lib/email");
   if (!emailConfigured()) return { error: "Emails are not set up yet." };
   const ok = await sendTicketEmail(code, await getSiteUrl());
-  return ok ? { message: "Ticket email sent." } : { error: "Could not send the email. Try again." };
+  return ok
+    ? { message: "Ticket email sent." }
+    : { error: `Could not send the email: ${getLastEmailError() || "ticket not found"}` };
 }

@@ -18,6 +18,10 @@ const smtpConfigured = () =>
   !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 const resendConfigured = () => !!process.env.RESEND_API_KEY && !!process.env.EMAIL_FROM;
 
+/** Why the last email in this request failed, so staff can see it. */
+let lastEmailError = "";
+export const getLastEmailError = () => lastEmailError;
+
 export function emailConfigured(): boolean {
   return smtpConfigured() || resendConfigured();
 }
@@ -77,12 +81,15 @@ async function sendEmail(opts: {
       }),
     });
     if (!res.ok) {
-      console.error("Email not sent:", res.status, (await res.text()).slice(0, 300));
+      const body = (await res.text()).slice(0, 300);
+      lastEmailError = `Resend refused it (${res.status}): ${body}`;
+      console.error("Email not sent:", lastEmailError);
       return false;
     }
     return true;
   } catch (err) {
-    console.error("Email not sent:", err instanceof Error ? err.message : err);
+    lastEmailError = err instanceof Error ? err.message : String(err);
+    console.error("Email not sent:", lastEmailError);
     return false;
   }
 }
