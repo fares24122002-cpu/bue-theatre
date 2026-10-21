@@ -1141,14 +1141,15 @@ fieldset.field {
 }
 
 .cast-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: 40px;
 }
 
-.cast-grid .person {
-  flex: 1 1 360px;
-  min-width: 0;
+@media (max-width: 719px) {
+  .cast-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .avatar {
