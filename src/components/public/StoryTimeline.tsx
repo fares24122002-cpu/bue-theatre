@@ -4,16 +4,25 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 type Item = { id: string; year: string; title: string; summary: string | null };
 
+const SPEED = 38; // pixels per second
+const RESUME_AFTER = 2500; // ms of quiet after a visitor touches it
+
 /**
- * Horizontal film-strip of milestones. The card nearest the middle is "lit"
- * and a soft spotlight follows it. Swipe on a phone, scroll or use the arrows
- * on a computer. Nothing moves by itself.
+ * Horizontal film-strip of milestones. The strip drifts sideways by itself
+ * through a spotlight that stays fixed in the middle; the card under the light
+ * is lit. Touch, hover or the arrows pause it for a moment. People who prefer
+ * reduced motion get a still strip they can swipe.
  */
 export function StoryTimeline({ items }: { items: Item[] }) {
+  const n = items.length;
   const track = useRef<HTMLUListElement>(null);
+  const paused = useRef(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [active, setActive] = useState(0);
+  const [copies, setCopies] = useState(1); // 1 = still strip, more = endless loop
   const [canPrev, setCanPrev] = useState(false);
-  const [canNext, setCanNext] = useState(items.length > 1);
+  const [canNext, setCanNext] = useState(n > 1);
+  const looping = copies > 1;
 
   const update = useCallback(() => {
     const el = track.current;
@@ -29,43 +38,118 @@ export function StoryTimeline({ items }: { items: Item[] }) {
         best = i;
       }
     });
-    setActive(best);
+    setActive(best % n);
     setCanPrev(el.scrollLeft > 4);
     setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  }, []);
+  }, [n]);
+
+  // Decide once whether to loop, and how many copies fill the screen.
+  useEffect(() => {
+    const el = track.current;
+    if (!el || n < 2) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const width = el.clientWidth;
+    const setWidth = n * (Math.min(width * 0.8, 320) + 20);
+    const k = Math.ceil((width / 2 + setWidth) / setWidth);
+    setCopies(2 * k + 1);
+  }, [n]);
+
+  // Centre the first card of the middle copy, then drift.
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    update();
+    if (copies < 2) return;
+
+    const first = el.children[((copies - 1) / 2) * n] as HTMLElement;
+    const next = el.children[((copies - 1) / 2 + 1) * n] as HTMLElement;
+    const setWidth = next.offsetLeft - first.offsetLeft;
+    const home = first.offsetLeft + first.offsetWidth / 2 - el.clientWidth / 2;
+    el.scrollLeft = home;
+    let pos = home;
+    let last = performance.now();
+    let raf = 0;
+
+    const tick = (t: number) => {
+      const dt = Math.min(t - last, 64);
+      last = t;
+      if (paused.current) {
+        pos = el.scrollLeft;
+      } else {
+        pos += (SPEED * dt) / 1000;
+      }
+      if (pos >= home + setWidth / 2) pos -= setWidth;
+      else if (pos < home - setWidth / 2) pos += setWidth;
+      if (!paused.current || Math.abs(el.scrollLeft - pos) > 1) el.scrollLeft = pos;
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [copies, n, update]);
 
   useEffect(() => {
-    update();
     const el = track.current;
     if (!el) return;
     const ro = new ResizeObserver(update);
     ro.observe(el);
-    return () => ro.disconnect();
+    return () => {
+      ro.disconnect();
+      if (timer.current) clearTimeout(timer.current);
+    };
   }, [update]);
+
+  function hold() {
+    paused.current = true;
+    if (timer.current) clearTimeout(timer.current);
+  }
+  function release(delay = RESUME_AFTER) {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      paused.current = false;
+    }, delay);
+  }
 
   function go(dir: 1 | -1) {
     const el = track.current;
     if (!el) return;
+    hold();
     const card = el.children[0] as HTMLElement | undefined;
     const step = (card?.offsetWidth ?? 280) + 20;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     el.scrollBy({ left: dir * step, behavior: reduce ? "auto" : "smooth" });
+    release();
   }
 
-  const pct = items.length > 1 ? (active / (items.length - 1)) * 100 : 50;
+  const list = Array.from({ length: copies }, (_, c) => items.map((m) => ({ m, c }))).flat();
 
   return (
-    <div className="timeline" style={{ ["--spot" as string]: `${pct}%` }}>
+    <div
+      className="timeline"
+      onMouseEnter={hold}
+      onMouseLeave={() => release(800)}
+      onTouchStart={hold}
+      onTouchEnd={() => release()}
+      onWheel={() => {
+        hold();
+        release();
+      }}
+      onFocus={hold}
+      onBlur={() => release()}
+    >
       <div className="timeline-glow" aria-hidden="true" />
       <ul
         ref={track}
         className="timeline-track"
         onScroll={update}
         tabIndex={0}
-        aria-label="Team milestones, scroll sideways"
+        aria-label="Team milestones"
       >
-        {items.map((m, i) => (
-          <li key={m.id} className={`timeline-card${i === active ? " is-lit" : ""}`}>
+        {list.map(({ m, c }, i) => (
+          <li
+            key={`${m.id}-${c}`}
+            className={`timeline-card${i % n === active ? " is-lit" : ""}`}
+            aria-hidden={c !== (copies - 1) / 2 && looping ? true : undefined}
+          >
             <span className="timeline-dot" aria-hidden="true" />
             <div className="timeline-year display">{m.year}</div>
             <div className="timeline-title display">{m.title}</div>
@@ -73,12 +157,12 @@ export function StoryTimeline({ items }: { items: Item[] }) {
           </li>
         ))}
       </ul>
-      {items.length > 1 ? (
+      {n > 1 ? (
         <div className="timeline-arrows">
-          <button type="button" className="timeline-arrow" onClick={() => go(-1)} disabled={!canPrev} aria-label="Earlier">
+          <button type="button" className="timeline-arrow" onClick={() => go(-1)} disabled={!looping && !canPrev} aria-label="Earlier">
             ←
           </button>
-          <button type="button" className="timeline-arrow" onClick={() => go(1)} disabled={!canNext} aria-label="Later">
+          <button type="button" className="timeline-arrow" onClick={() => go(1)} disabled={!looping && !canNext} aria-label="Later">
             →
           </button>
         </div>
