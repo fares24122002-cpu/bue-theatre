@@ -9,7 +9,7 @@ export default function ActorLayout({ children }: LayoutProps<"/actor">) {
     <>
       <header className="app-bar">
         <Link href="/actor" className="logo display">
-          BUE THEATRE<span>.</span>
+          BUE THEATRE TEAM<span>.</span>
         </Link>
         <nav className="nav" aria-label="Actor">
           <Link href="/actor">Dashboard</Link>

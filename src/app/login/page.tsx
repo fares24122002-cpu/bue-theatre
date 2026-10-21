@@ -10,7 +10,7 @@ export default function LoginPage() {
     <>
       <header className="site-header">
         <Link href="/" className="logo display">
-          BUE THEATRE<span>.</span>
+          BUE THEATRE TEAM<span>.</span>
         </Link>
         <nav className="nav" aria-label="Main">
           <Link href="/">← Back to the public site</Link>

@@ -11,7 +11,7 @@ export default function PublicLayout({ children }: LayoutProps<"/">) {
       </Suspense>
       <header className="site-header">
         <Link href="/" className="logo display">
-          BUE THEATRE<span>.</span>
+          BUE THEATRE TEAM<span>.</span>
         </Link>
       </header>
       <main>

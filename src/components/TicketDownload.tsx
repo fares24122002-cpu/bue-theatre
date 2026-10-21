@@ -35,9 +35,9 @@ export function TicketDownload({ qr, title, when, venue, name, tickets, code }: 
       c.fillRect(0, 0, W, 130);
       c.fillStyle = "#fff";
       c.font = "bold 72px Impact, 'Arial Narrow', sans-serif";
-      c.fillText("BUE THEATRE", 48, 92);
+      c.fillText("BUE THEATRE TEAM", 48, 92);
       c.fillStyle = "#d42a24";
-      c.fillText(".", 48 + c.measureText("BUE THEATRE").width, 92);
+      c.fillText(".", 48 + c.measureText("BUE THEATRE TEAM").width, 92);
 
       const wrap = (txt: string, x: number, y: number, max: number, lh: number) => {
         let line = "";

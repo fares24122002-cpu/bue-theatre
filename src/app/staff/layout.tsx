@@ -9,7 +9,7 @@ export default function StaffLayout({ children }: LayoutProps<"/staff">) {
     <>
       <header className="app-bar">
         <Link href="/staff/workshops" className="logo display">
-          BUE THEATRE<span>.</span>
+          BUE THEATRE TEAM<span>.</span>
           <span className="badge">STAFF</span>
         </Link>
         <nav className="nav" aria-label="Staff">

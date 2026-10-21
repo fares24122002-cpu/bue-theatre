@@ -101,7 +101,7 @@ const esc = (s: string) =>
 function frame(inner: string): string {
   return `<div style="background:#f2f2f2;padding:24px 12px;font-family:Arial,Helvetica,sans-serif;color:#111">
 <div style="max-width:560px;margin:0 auto;background:#fff;border:4px solid #111">
-<div style="background:#111;color:#fff;padding:16px 24px;font-size:26px;font-weight:bold;letter-spacing:1px">BUE THEATRE<span style="color:#d42a24">.</span></div>
+<div style="background:#111;color:#fff;padding:16px 24px;font-size:26px;font-weight:bold;letter-spacing:1px">BUE THEATRE TEAM<span style="color:#d42a24">.</span></div>
 <div style="padding:24px;font-size:16px;line-height:1.5">${inner}</div>
 </div></div>`;
 }

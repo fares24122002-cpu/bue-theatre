@@ -89,10 +89,8 @@ export async function TeamSection() {
           {block("president", 88)}
           {block("vice_president", 88)}
         </div>
-        <div className="team-row">
-          {block("backstage", 72)}
-          {block("media", 72)}
-        </div>
+        {block("backstage", 72)}
+        {block("media", 72)}
         <div className="team-block">
           <h3 className="team-heading display">{TEAM_GROUP_LABEL.cast.toUpperCase()}</h3>
           {by("cast").length === 0 ? (
