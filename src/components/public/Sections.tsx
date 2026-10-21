@@ -12,6 +12,7 @@ import {
   type TeamMember,
 } from "@/lib/content";
 import { TEAM_GROUP_LABEL, type TeamGroup } from "@/lib/types";
+import { StoryTimeline } from "@/components/public/StoryTimeline";
 import { formatDay, formatFullDay, formatTime } from "@/lib/time";
 
 function Avatar({ url, name, size }: { url: string | null; name: string; size: number }) {
@@ -38,34 +39,23 @@ function PersonRow({ name, role, bio, photo, size }: { name: string; role: strin
   );
 }
 
-/** Our story + milestones (dark block). */
+/** Our story: stage-spotlight block with a swipeable timeline of milestones. */
 export async function HistorySection() {
   const [settings, milestones] = await Promise.all([getSettings(), getMilestones()]);
   return (
     <section id="about" className="history">
+      {settings.story_background ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={settings.story_background} alt="" className="history-photo" loading="lazy" />
+      ) : null}
+      <div className="history-beams" aria-hidden="true" />
       <div className="history-inner">
-        <div className="history-left">
-          <h1 className="display history-title">
-            OUR
-            <br />
-            STORY
-          </h1>
-          {settings.story ? <p className="history-text">{settings.story}</p> : null}
-        </div>
-        <div className="history-right">
-          {milestones.map((m) => (
-            <div key={m.id} className="milestone">
-              <div className="milestone-year display">{m.year}</div>
-              <div>
-                <div className="milestone-title display">{m.title}</div>
-                {m.summary ? <div className="milestone-text">{m.summary}</div> : null}
-              </div>
-            </div>
-          ))}
-          {milestones.length === 0 && !settings.story ? (
-            <p className="history-text">The team&apos;s story will appear here soon.</p>
-          ) : null}
-        </div>
+        <h1 className="display history-title">OUR STORY</h1>
+        {settings.story ? <p className="history-text">{settings.story}</p> : null}
+        {milestones.length > 0 ? <StoryTimeline items={milestones} /> : null}
+        {milestones.length === 0 && !settings.story ? (
+          <p className="history-text">The team&apos;s story will appear here soon.</p>
+        ) : null}
       </div>
     </section>
   );

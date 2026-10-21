@@ -910,79 +910,194 @@ fieldset.field {
 }
 
 .history {
-  background: var(--ink);
+  position: relative;
+  overflow: hidden;
+  background: #0b0b0b;
   color: var(--paper);
 }
 
+.history-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.35;
+}
+
+/* Two warm stage lights falling from the top corners. No picture needed. */
+.history-beams {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.7)),
+    conic-gradient(from 198deg at 18% -8%, transparent 0deg, rgba(255, 214, 150, 0.2) 7deg, transparent 17deg),
+    conic-gradient(from 162deg at 82% -8%, transparent 0deg, rgba(255, 214, 150, 0.2) 7deg, transparent 17deg);
+}
+
 .history-inner {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 48px 80px;
+  position: relative;
   max-width: var(--max);
   margin: 0 auto;
   padding: 88px var(--gutter);
-}
-
-.history-left,
-.history-right {
-  flex: 1 1 380px;
-  min-width: 0;
   display: flex;
   flex-direction: column;
-}
-
-.history-left {
   gap: 28px;
 }
 
-.history-right {
-  justify-content: flex-end;
-}
-
 .history-title {
-  font-size: clamp(80px, 13vw, 190px);
+  font-size: clamp(72px, 13vw, 190px);
   line-height: 0.88;
 }
 
 .history-text {
-  max-width: 560px;
+  max-width: 640px;
   font-size: 20px;
   line-height: 1.6;
   color: #e4e4e4;
   white-space: pre-line;
 }
 
-.milestone {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 8px 28px;
-  padding: 24px 0;
-  border-top: 2px solid var(--paper);
+.timeline {
+  position: relative;
+  margin: 24px calc(var(--gutter) * -1) 0;
 }
 
-.milestone-year {
-  flex: 0 0 120px;
-  font-size: 56px;
+.timeline-glow {
+  position: absolute;
+  left: var(--spot, 50%);
+  top: 50%;
+  width: min(70vw, 560px);
+  height: 420px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(255, 214, 150, 0.22), transparent);
+  transition: left 0.5s ease;
+  pointer-events: none;
+}
+
+.timeline-track {
+  position: relative;
+  display: flex;
+  gap: 20px;
+  list-style: none;
+  margin: 0;
+  padding: 36px var(--gutter) 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 var(--gutter);
+  scrollbar-width: none;
+}
+
+.timeline-track::-webkit-scrollbar {
+  display: none;
+}
+
+.timeline-card {
+  position: relative;
+  flex: 0 0 min(80vw, 320px);
+  scroll-snap-align: center;
+  padding-top: 32px;
+  opacity: 0.45;
+  transform: scale(0.96);
+  transform-origin: left top;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.timeline-card.is-lit {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* the line the dots sit on, drawn per card so it scrolls with the strip */
+.timeline-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: -20px;
+  top: 7px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.timeline-card:last-child::before {
+  right: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--paper);
+}
+
+.is-lit .timeline-dot {
+  background: var(--accent-light);
+  box-shadow: 0 0 0 6px rgba(255, 106, 99, 0.3);
+}
+
+.timeline-year {
+  font-size: 64px;
   line-height: 1;
   color: var(--accent-light);
 }
 
-.milestone > div:last-child {
-  flex: 1 1 220px;
-  min-width: 0;
-}
-
-.milestone-title {
-  font-size: 36px;
+.timeline-title {
+  margin-top: 8px;
+  font-size: 34px;
   line-height: 1.05;
 }
 
-.milestone-text {
-  margin-top: 6px;
+.timeline-text {
+  margin-top: 10px;
   font-size: 17px;
   line-height: 1.5;
   color: #e4e4e4;
+}
+
+.timeline-arrows {
+  position: relative;
+  display: none;
+  gap: 12px;
+  padding: 0 var(--gutter);
+}
+
+.timeline-arrow {
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--paper);
+  background: transparent;
+  color: var(--paper);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.timeline-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.timeline-track:focus-visible,
+.timeline-arrow:focus-visible {
+  outline: 3px solid var(--accent-light);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (min-width: 720px) {
+  .timeline-arrows {
+    display: flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline-glow,
+  .timeline-card {
+    transition: none;
+  }
 }
 
 .team-rows {

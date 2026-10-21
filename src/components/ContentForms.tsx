@@ -43,7 +43,7 @@ function useResetOnSuccess(state: ActionState, enabled: boolean) {
 export function SettingsForm({
   values,
 }: {
-  values: { story: string; tagline: string; contact_email: string; instagram: string };
+  values: { story: string; tagline: string; contact_email: string; instagram: string; story_background: string };
 }) {
   const [state, action, pending] = useActionState(saveSettings, {});
   return (
@@ -52,6 +52,12 @@ export function SettingsForm({
         <label htmlFor="story">Our story (a few sentences)</label>
         <textarea id="story" name="story" rows={5} maxLength={4000} defaultValue={values.story} />
       </div>
+      <ImageUpload
+        name="story_background"
+        folder="story"
+        label="Stage photo behind Our story (optional, a dark theatre or stage picture works best)"
+        initialUrl={values.story_background}
+      />
       <div className="field">
         <label htmlFor="tagline">Team tagline (big red band on the home page)</label>
         <input id="tagline" name="tagline" maxLength={120} defaultValue={values.tagline} />

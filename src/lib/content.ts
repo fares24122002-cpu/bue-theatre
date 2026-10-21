@@ -7,6 +7,7 @@ export type Settings = {
   tagline: string;
   contact_email: string;
   instagram: string;
+  story_background: string;
 };
 
 export type Milestone = {
@@ -72,6 +73,7 @@ export async function getSettings(): Promise<Settings> {
     tagline: map.get("tagline") ?? "",
     contact_email: map.get("contact_email") ?? "",
     instagram: map.get("instagram") ?? "",
+    story_background: map.get("story_background") ?? "",
   };
 }
 

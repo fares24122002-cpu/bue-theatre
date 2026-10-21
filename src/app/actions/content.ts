@@ -43,7 +43,10 @@ export async function saveSettings(
   formData: FormData,
 ): Promise<ActionState> {
   await requireRole("staff");
+  const background = mediaUrl(text(formData.get("story_background")));
+  if (background === "invalid") return { error: "That picture is not valid. Upload it again." };
   const rows = [
+    { key: "story_background", value: background ?? "" },
     { key: "story", value: text(formData.get("story")).slice(0, 4000) },
     { key: "tagline", value: text(formData.get("tagline")).slice(0, 120) },
     { key: "contact_email", value: text(formData.get("contact_email")).slice(0, 160) },
