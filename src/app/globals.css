@@ -1058,7 +1058,7 @@ fieldset.field {
 
 .timeline-arrows {
   position: relative;
-  display: none;
+  display: flex;
   gap: 12px;
   padding: 0 var(--gutter);
 }
@@ -1084,9 +1084,13 @@ fieldset.field {
   outline-offset: 2px;
 }
 
+.timeline-nav {
+  display: none;
+}
+
 @media (hover: hover) and (min-width: 720px) {
-  .timeline-arrows {
-    display: flex;
+  .timeline-nav {
+    display: block;
   }
 }
 

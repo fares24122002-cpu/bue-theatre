@@ -5,23 +5,23 @@ import { useCallback, useEffect, useRef, useState } from "react";
 type Item = { id: string; year: string; title: string; summary: string | null };
 
 const SPEED = 38; // pixels per second
-const RESUME_AFTER = 2500; // ms of quiet after a visitor touches it
+const RESUME_AFTER = 1000; // ms after a finger leaves the strip
 
 /**
  * Horizontal film-strip of milestones. The strip drifts sideways by itself
  * through a spotlight that stays fixed in the middle; the card under the light
- * is lit. Touch, hover or the arrows pause it for a moment. People who prefer
- * reduced motion get a still strip they can swipe.
+ * is lit. Mouse hover never stops it. A finger or the arrows pause it for a
+ * moment, and a Pause button lets anyone stop it for good.
  */
 export function StoryTimeline({ items }: { items: Item[] }) {
   const n = items.length;
   const track = useRef<HTMLUListElement>(null);
   const paused = useRef(false);
+  const userPaused = useRef(false);
+  const [stopped, setStopped] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [active, setActive] = useState(0);
   const [copies, setCopies] = useState(1); // 1 = still strip, more = endless loop
-  const [canPrev, setCanPrev] = useState(false);
-  const [canNext, setCanNext] = useState(n > 1);
   const looping = copies > 1;
 
   const update = useCallback(() => {
@@ -39,15 +39,12 @@ export function StoryTimeline({ items }: { items: Item[] }) {
       }
     });
     setActive(best % n);
-    setCanPrev(el.scrollLeft > 4);
-    setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
   }, [n]);
 
   // Decide once whether to loop, and how many copies fill the screen.
   useEffect(() => {
     const el = track.current;
     if (!el || n < 2) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const width = el.clientWidth;
     const setWidth = n * (Math.min(width * 0.8, 320) + 20);
     const k = Math.ceil((width / 2 + setWidth) / setWidth);
@@ -73,14 +70,14 @@ export function StoryTimeline({ items }: { items: Item[] }) {
     const tick = (t: number) => {
       const dt = Math.min(t - last, 64);
       last = t;
-      if (paused.current) {
+      if (paused.current || userPaused.current) {
         pos = el.scrollLeft;
       } else {
         pos += (SPEED * dt) / 1000;
       }
       if (pos >= home + setWidth / 2) pos -= setWidth;
       else if (pos < home - setWidth / 2) pos += setWidth;
-      if (!paused.current || Math.abs(el.scrollLeft - pos) > 1) el.scrollLeft = pos;
+      if (!(paused.current || userPaused.current) || Math.abs(el.scrollLeft - pos) > 1) el.scrollLeft = pos;
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -115,8 +112,7 @@ export function StoryTimeline({ items }: { items: Item[] }) {
     hold();
     const card = el.children[0] as HTMLElement | undefined;
     const step = (card?.offsetWidth ?? 280) + 20;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    el.scrollBy({ left: dir * step, behavior: reduce ? "auto" : "smooth" });
+    el.scrollBy({ left: dir * step, behavior: "smooth" });
     release();
   }
 
@@ -125,16 +121,9 @@ export function StoryTimeline({ items }: { items: Item[] }) {
   return (
     <div
       className="timeline"
-      onMouseEnter={hold}
-      onMouseLeave={() => release(800)}
       onTouchStart={hold}
       onTouchEnd={() => release()}
-      onWheel={() => {
-        hold();
-        release();
-      }}
-      onFocus={hold}
-      onBlur={() => release()}
+      onTouchCancel={() => release()}
     >
       <div className="timeline-glow" aria-hidden="true" />
       <ul
@@ -159,11 +148,23 @@ export function StoryTimeline({ items }: { items: Item[] }) {
       </ul>
       {n > 1 ? (
         <div className="timeline-arrows">
-          <button type="button" className="timeline-arrow" onClick={() => go(-1)} disabled={!looping && !canPrev} aria-label="Earlier">
+          <button type="button" className="timeline-arrow timeline-nav" onClick={() => go(-1)} aria-label="Earlier">
             ←
           </button>
-          <button type="button" className="timeline-arrow" onClick={() => go(1)} disabled={!looping && !canNext} aria-label="Later">
+          <button type="button" className="timeline-arrow timeline-nav" onClick={() => go(1)} aria-label="Later">
             →
+          </button>
+          <button
+            type="button"
+            className="timeline-arrow"
+            aria-pressed={stopped}
+            aria-label={stopped ? "Play the timeline" : "Pause the timeline"}
+            onClick={() => {
+              userPaused.current = !userPaused.current;
+              setStopped(userPaused.current);
+            }}
+          >
+            {stopped ? "▶" : "❚❚"}
           </button>
         </div>
       ) : null}
