@@ -65,15 +65,17 @@ export async function HistorySection() {
 export async function TeamSection() {
   const team = await getTeam();
   const by = (g: TeamGroup) => team.filter((t) => t.team_group === g);
-  const block = (g: TeamGroup, size: number) => (
+  const block = (g: TeamGroup, size: number, grid = false) => (
     <div className="team-block">
       <h3 className="team-heading display">{TEAM_GROUP_LABEL[g].toUpperCase()}</h3>
       {by(g).length === 0 ? (
         <p className="muted team-empty">Coming soon.</p>
       ) : (
-        by(g).map((p: TeamMember) => (
-          <PersonRow key={p.id} name={p.name} role={p.role} bio={p.bio} photo={p.photo_url} size={size} />
-        ))
+        <div className={grid ? "cast-grid" : undefined}>
+          {by(g).map((p: TeamMember) => (
+            <PersonRow key={p.id} name={p.name} role={p.role} bio={p.bio} photo={p.photo_url} size={size} />
+          ))}
+        </div>
       )}
     </div>
   );
@@ -89,8 +91,8 @@ export async function TeamSection() {
           {block("president", 88)}
           {block("vice_president", 88)}
         </div>
-        {block("backstage", 72)}
-        {block("media", 72)}
+        {block("backstage", 72, true)}
+        {block("media", 72, true)}
         <div className="team-block">
           <h3 className="team-heading display">{TEAM_GROUP_LABEL.cast.toUpperCase()}</h3>
           {by("cast").length === 0 ? (
