@@ -12,6 +12,7 @@ import {
   type TeamMember,
 } from "@/lib/content";
 import { TEAM_GROUP_LABEL, type TeamGroup } from "@/lib/types";
+import { AlbumPhotos } from "@/components/public/AlbumPhotos";
 import { StoryTimeline } from "@/components/public/StoryTimeline";
 import { formatDay, formatFullDay, formatTime } from "@/lib/time";
 
@@ -244,14 +245,7 @@ export async function GallerySection() {
                   </span>
                 </span>
               </summary>
-              <div className="photo-grid album-photos">
-                {photos.map((p) => (
-                  <a key={p.id} href={p.url} target="_blank" rel="noopener noreferrer" className="photo">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.url} alt={`${album.title}, photo`} loading="lazy" />
-                  </a>
-                ))}
-              </div>
+              <AlbumPhotos title={album.title} photos={photos.map((p) => ({ id: p.id, url: p.url }))} />
             </details>
           ))}
         </div>
