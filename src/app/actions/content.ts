@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/action-state";
+import { TEAM_GROUP_ORDER } from "@/lib/types";
 import { cairoToDate, isDate, isTime } from "@/lib/time";
 
 const text = (v: FormDataEntryValue | null) =>
@@ -98,7 +99,7 @@ export async function deleteMilestone(
 
 /* -------------------------------- Team --------------------------------- */
 
-const GROUPS = ["director", "assistant_director", "backstage", "media", "cast"];
+const GROUPS: string[] = [...TEAM_GROUP_ORDER];
 
 export async function saveTeamMember(
   _prev: ActionState,
