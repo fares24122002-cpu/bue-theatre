@@ -1705,3 +1705,74 @@ fieldset.field {
     display: none;
   }
 }
+
+/* English / Arabic groups */
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 20px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.filter-chip.is-on {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.check-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-weight: 600;
+}
+
+.check input {
+  width: 22px;
+  height: 22px;
+}
+
+.group-pick {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.group-pick legend {
+  padding: 0;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.group-line {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 2px solid var(--ink);
+}
+
+.cast-lang-block {
+  margin-top: 28px;
+}
+
+.cast-lang {
+  margin-bottom: 8px;
+  font-size: 28px;
+  color: var(--accent);
+}

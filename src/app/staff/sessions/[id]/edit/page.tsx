@@ -14,7 +14,7 @@ export default async function EditSessionPage({
   const supabase = await createClient();
   const { data: s } = await supabase
     .from("sessions")
-    .select("id,title,location,notes,starts_at,late_after,closes_at")
+    .select("id,title,location,notes,language,starts_at,late_after,closes_at")
     .eq("id", id)
     .maybeSingle();
   if (!s) notFound();
@@ -35,6 +35,7 @@ export default async function EditSessionPage({
           start: toTimeInput(s.starts_at),
           lateAfter: toTimeInput(s.late_after),
           closes: toTimeInput(s.closes_at),
+          language: s.language,
         }}
       />
     </div>

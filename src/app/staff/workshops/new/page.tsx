@@ -20,6 +20,7 @@ export default function NewWorkshopPage() {
           start: "",
           lateAfter: "",
           closes: "",
+          language: "both",
         }}
       />
     </div>

@@ -11,7 +11,7 @@ import {
   type ShowPerson,
   type TeamMember,
 } from "@/lib/content";
-import { TEAM_GROUP_LABEL, type TeamGroup } from "@/lib/types";
+import { LANGUAGE_LABEL, TEAM_GROUP_LABEL, type TeamGroup } from "@/lib/types";
 import { AlbumPhotos } from "@/components/public/AlbumPhotos";
 import { StoryTimeline } from "@/components/public/StoryTimeline";
 import { formatDay, formatFullDay, formatTime } from "@/lib/time";
@@ -80,6 +80,14 @@ export async function TeamSection() {
       )}
     </div>
   );
+  const castList = (list: TeamMember[]) =>
+    list.length === 0 ? null : (
+      <div className="cast-grid">
+        {list.map((p) => (
+          <PersonRow key={p.id} name={p.name} role={p.role} bio={p.bio} photo={p.photo_url} size={72} />
+        ))}
+      </div>
+    );
   return (
     <section id="team" className="section">
       <h2 className="section-h display">MEET THE TEAM</h2>
@@ -99,11 +107,18 @@ export async function TeamSection() {
           {by("cast").length === 0 ? (
             <p className="muted team-empty">Coming soon.</p>
           ) : (
-            <div className="cast-grid">
-              {by("cast").map((p) => (
-                <PersonRow key={p.id} name={p.name} role={p.role} bio={p.bio} photo={p.photo_url} size={72} />
-              ))}
-            </div>
+            <>
+              {castList(by("cast").filter((p) => !p.cast_language))}
+              {(["english", "arabic"] as const).map((l) => {
+                const list = by("cast").filter((p) => p.cast_language === l);
+                return list.length === 0 ? null : (
+                  <div key={l} className="cast-lang-block">
+                    <h4 className="cast-lang display">{LANGUAGE_LABEL[l].toUpperCase()} CAST</h4>
+                    {castList(list)}
+                  </div>
+                );
+              })}
+            </>
           )}
         </div>
       </div>

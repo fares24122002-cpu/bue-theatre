@@ -26,6 +26,7 @@ export type TeamMember = {
   role: string | null;
   bio: string | null;
   sort_order: number;
+  cast_language: "english" | "arabic" | null;
 };
 
 export type Show = {
@@ -89,7 +90,7 @@ export async function getMilestones(): Promise<Milestone[]> {
 export async function getTeam(): Promise<TeamMember[]> {
   const { data } = await createPublicClient()
     .from("team_members")
-    .select("id,name,photo_url,team_group,role,bio,sort_order")
+    .select("id,name,photo_url,team_group,role,bio,sort_order,cast_language")
     .order("sort_order", { ascending: true })
     .order("name", { ascending: true });
   return (data ?? []) as TeamMember[];

@@ -10,7 +10,13 @@ import { createClient } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/site";
 import { formatFullDay, formatTime } from "@/lib/time";
 import { STATUSES, STATUS_LABEL } from "@/lib/session-status";
-import type { AttendanceStatus } from "@/lib/types";
+import {
+  LANGUAGE_LABEL,
+  sessionHasGroup,
+  type AttendanceStatus,
+  type Language,
+  type SessionLanguage,
+} from "@/lib/types";
 
 export const metadata: Metadata = { title: "Session" };
 
@@ -21,7 +27,7 @@ export default async function StaffSessionPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: s }, { data: tokenRow }, { data: att }, { data: actors }] =
+  const [{ data: s }, { data: tokenRow }, { data: att }, { data: actors }, { data: groupRows }] =
     await Promise.all([
       supabase.from("sessions").select("*").eq("id", id).maybeSingle(),
       supabase.from("session_tokens").select("qr_token").eq("session_id", id).maybeSingle(),
@@ -31,6 +37,7 @@ export default async function StaffSessionPage({
         .select("id,full_name,active")
         .eq("role", "actor")
         .order("full_name"),
+      supabase.from("actor_groups").select("actor_id,language,active"),
     ]);
   if (!s) notFound();
 
@@ -40,8 +47,17 @@ export default async function StaffSessionPage({
   const scannedAt = new Map<string, string | null>(
     (att ?? []).map((a) => [a.actor_id, a.scanned_at]),
   );
-  // Active actors, plus anyone deactivated who still has a mark in this session.
-  const people = (actors ?? []).filter((a) => a.active || statusOf.has(a.id));
+  // Actors in an active group this workshop is for, plus anyone who still has
+  // a mark in it (for example someone removed from the group afterwards).
+  const lang = s.language as SessionLanguage;
+  const inGroup = new Set(
+    (groupRows ?? [])
+      .filter((g) => g.active && sessionHasGroup(lang, g.language as Language))
+      .map((g) => g.actor_id),
+  );
+  const people = (actors ?? []).filter(
+    (a) => statusOf.has(a.id) || (a.active && inGroup.has(a.id)),
+  );
 
   const counts = { present: 0, late: 0, excused: 0, absent: 0, none: 0 };
   for (const a of people) {
@@ -76,6 +92,7 @@ export default async function StaffSessionPage({
           </p>
           {s.notes ? <p className="muted">{s.notes}</p> : null}
           <p>
+            <span className="chip">{LANGUAGE_LABEL[lang]}</span>{" "}
             {s.cancelled ? <span className="chip chip-absent">Cancelled</span> : null}{" "}
             {s.closed_at ? <span className="chip">Closed</span> : null}
           </p>
@@ -153,7 +170,7 @@ export default async function StaffSessionPage({
 
       <h2 className="display section-title">Attendance sheet</h2>
       {people.length === 0 ? (
-        <p className="empty">No actors yet. Add actors on the Actors page.</p>
+        <p className="empty">No actors in this workshop's group yet. Add actors on the Actors page.</p>
       ) : (
         <ul className="sheet">
           {people.map((a) => {

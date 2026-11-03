@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { saveSession } from "@/app/actions/sessions";
+import { LANGUAGE_LABEL, type SessionLanguage } from "@/lib/types";
 
 export type SessionFormValues = {
   id?: string;
@@ -12,6 +13,7 @@ export type SessionFormValues = {
   start: string;
   lateAfter: string;
   closes: string;
+  language: SessionLanguage;
 };
 
 /** Create or edit a workshop. All times are Cairo time. */
@@ -32,6 +34,21 @@ export function SessionForm({ values }: { values: SessionFormValues }) {
           defaultValue={values.title}
           placeholder="Acting workshop"
         />
+      </div>
+
+      <div className="field">
+        <label htmlFor="language">Who is it for?</label>
+        <select id="language" name="language" defaultValue={values.language}>
+          {(["both", "english", "arabic"] as const).map((l) => (
+            <option key={l} value={l}>
+              {l === "both" ? "Both groups (English and Arabic)" : `${LANGUAGE_LABEL[l]} group only`}
+            </option>
+          ))}
+        </select>
+        <p className="form-hint">
+          Only actors in that group see the workshop, can scan in, and are marked
+          absent if they do not come.
+        </p>
       </div>
 
       <div className="field">

@@ -113,6 +113,7 @@ export async function saveTeamMember(
   const bio = text(formData.get("bio"));
   const photo = mediaUrl(text(formData.get("photo_url")));
   const order = intIn(text(formData.get("sort_order")) || "0", 0, 9999);
+  const castLanguage = text(formData.get("cast_language"));
 
   if (!name || name.length > 120) return { error: "Enter the name." };
   if (!GROUPS.includes(group)) return { error: "Choose a group." };
@@ -126,6 +127,10 @@ export async function saveTeamMember(
     bio: bio ? bio.slice(0, 600) : null,
     photo_url: photo,
     sort_order: order,
+    cast_language:
+      group === "cast" && (castLanguage === "english" || castLanguage === "arabic")
+        ? castLanguage
+        : null,
   };
   const supabase = await createClient();
   const { error } = id

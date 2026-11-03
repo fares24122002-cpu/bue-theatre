@@ -17,11 +17,18 @@ export default async function NewFormPage({
   const wanted = Array.isArray(sp.session) ? sp.session[0] : sp.session;
 
   const supabase = await createClient();
+  const { data: groupRows } = await supabase
+    .from("actor_groups")
+    .select("language")
+    .eq("actor_id", me.id)
+    .eq("active", true);
+  const liveLanguages = (groupRows ?? []).map((g) => g.language as string);
   const [{ data: sessions }, { data: sent }] = await Promise.all([
     supabase
       .from("sessions")
       .select("id,title,starts_at")
       .eq("cancelled", false)
+      .in("language", [...liveLanguages, "both"])
       .gt("starts_at", new Date().toISOString())
       .order("starts_at", { ascending: true })
       .limit(30),

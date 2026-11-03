@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { GroupFilter, readGroupFilter } from "@/components/GroupFilter";
 import { formatDay, formatTime } from "@/lib/time";
+import { LANGUAGE_LABEL, sessionHasGroup, type SessionLanguage } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Workshops" };
 
@@ -15,6 +17,7 @@ type Row = {
   closes_at: string;
   cancelled: boolean;
   closed_at: string | null;
+  language: SessionLanguage;
 };
 
 function SessionRow({ s }: { s: Row }) {
@@ -30,6 +33,7 @@ function SessionRow({ s }: { s: Row }) {
             {s.location ? ` · ${s.location}` : ""}
           </span>
         </span>
+        <span className="chip">{LANGUAGE_LABEL[s.language]}</span>
         {s.cancelled ? (
           <span className="chip chip-absent">Cancelled</span>
         ) : s.closed_at ? (
@@ -40,14 +44,17 @@ function SessionRow({ s }: { s: Row }) {
   );
 }
 
-export default async function StaffWorkshopsPage() {
+export default async function StaffWorkshopsPage({
+  searchParams,
+}: PageProps<"/staff/workshops">) {
   await connection();
+  const group = readGroupFilter(await searchParams);
   const supabase = await createClient();
   const { data } = await supabase
     .from("sessions")
-    .select("id,title,location,starts_at,late_after,closes_at,cancelled,closed_at")
+    .select("id,title,location,language,starts_at,late_after,closes_at,cancelled,closed_at")
     .order("starts_at", { ascending: true });
-  const all = (data ?? []) as Row[];
+  const all = ((data ?? []) as Row[]).filter((s) => !group || sessionHasGroup(s.language, group));
 
   const now = Date.now();
   const upcoming = all.filter((s) => new Date(s.closes_at).getTime() >= now);
@@ -64,6 +71,8 @@ export default async function StaffWorkshopsPage() {
           + NEW WORKSHOP
         </Link>
       </div>
+
+      <GroupFilter base="/staff/workshops" current={group} />
 
       <h2 className="display section-title">Upcoming</h2>
       {upcoming.length === 0 ? (

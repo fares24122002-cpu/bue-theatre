@@ -1,5 +1,27 @@
 export type Role = "staff" | "actor";
 
+/** Actors are divided into an English group and an Arabic group. */
+export type Language = "english" | "arabic";
+export type SessionLanguage = Language | "both";
+
+export const LANGUAGES: Language[] = ["english", "arabic"];
+
+export const LANGUAGE_LABEL: Record<SessionLanguage, string> = {
+  english: "English",
+  arabic: "Arabic",
+  both: "English and Arabic",
+};
+
+export const isLanguage = (v: unknown): v is Language =>
+  v === "english" || v === "arabic";
+
+export const isSessionLanguage = (v: unknown): v is SessionLanguage =>
+  v === "english" || v === "arabic" || v === "both";
+
+/** Does a workshop for `session` concern the group `group`? */
+export const sessionHasGroup = (session: SessionLanguage, group: Language) =>
+  session === "both" || session === group;
+
 export type AttendanceStatus = "present" | "late" | "excused" | "absent";
 
 export type FormType = "absence" | "late";

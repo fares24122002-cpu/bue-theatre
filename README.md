@@ -82,6 +82,7 @@ The service role key must only be added as a variable in Vercel. It must never b
 - Attendance rate = (present + late) / all sessions. Excused and absent both lower it.
 - Forms can only be sent before the session starts.
 - Staff set three times per session: start, late-after and QR closes.
+- Actors are in the English group, the Arabic group, or both. Each workshop is for one group or both. Excuses (2) and absences (2) are counted per group; going over the absence limit removes the actor from that group only, and the account is deactivated when no active group is left. A workshop for both groups counts in every group the actor is in. Run `supabase/migrations/0008_language_groups.sql` before deploying this version.
 
 ## How attendance works
 

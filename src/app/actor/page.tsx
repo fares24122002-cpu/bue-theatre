@@ -6,7 +6,13 @@ import { createClient } from "@/lib/supabase/server";
 import { MAX_ABSENCES, MAX_EXCUSES, attendanceRate, type AttendanceCounts } from "@/lib/rules";
 import { STATUS_LABEL } from "@/lib/session-status";
 import { formatDay, formatTime } from "@/lib/time";
-import type { AttendanceStatus } from "@/lib/types";
+import {
+  LANGUAGES,
+  LANGUAGE_LABEL,
+  type AttendanceStatus,
+  type Language,
+  type SessionLanguage,
+} from "@/lib/types";
 
 export const metadata: Metadata = { title: "My dashboard" };
 
@@ -19,6 +25,20 @@ export default async function ActorDashboardPage({
   const me = await requireRole("actor");
   const supabase = await createClient();
 
+  const { data: groupRows } = await supabase
+    .from("actor_groups")
+    .select("language,active,excuses_used,absences_used")
+    .eq("actor_id", me.id);
+  const groups = ((groupRows ?? []) as {
+    language: Language;
+    active: boolean;
+    excuses_used: number;
+    absences_used: number;
+  }[]).sort((a, b) => LANGUAGES.indexOf(a.language) - LANGUAGES.indexOf(b.language));
+  // Upcoming workshops are those of the groups they are still in.
+  const liveLanguages = groups.filter((g) => g.active).map((g) => g.language);
+  const showTag = groups.length > 1;
+
   const [{ data: att }, { data: upcoming }, { data: myForms }] = await Promise.all([
     supabase
       .from("attendance")
@@ -26,8 +46,9 @@ export default async function ActorDashboardPage({
       .eq("actor_id", me.id),
     supabase
       .from("sessions")
-      .select("id,title,location,notes,starts_at,late_after,closes_at")
+      .select("id,title,location,notes,language,starts_at,late_after,closes_at")
       .eq("cancelled", false)
+      .in("language", [...liveLanguages, "both"])
       .gte("closes_at", new Date().toISOString())
       .order("starts_at", { ascending: true })
       .limit(10),
@@ -74,16 +95,36 @@ export default async function ActorDashboardPage({
         </div>
         <dl className="stat-row stat-big">
           <div><dt>Times late</dt><dd>{counts.late}</dd></div>
-          <div><dt>Excuses used</dt><dd>{me.excuses_used}/{MAX_EXCUSES}</dd></div>
-          <div><dt>Absences</dt><dd>{me.absences_used}/{MAX_ABSENCES}</dd></div>
+          {groups.map((g) => (
+            <div key={`e-${g.language}`}>
+              <dt>{showTag ? `${LANGUAGE_LABEL[g.language]} excuses` : "Excuses used"}</dt>
+              <dd>{g.excuses_used}/{MAX_EXCUSES}</dd>
+            </div>
+          ))}
+          {groups.map((g) => (
+            <div key={`a-${g.language}`}>
+              <dt>{showTag ? `${LANGUAGE_LABEL[g.language]} absences` : "Absences"}</dt>
+              <dd>{g.absences_used}/{MAX_ABSENCES}</dd>
+            </div>
+          ))}
         </dl>
       </section>
-      {me.absences_used >= MAX_ABSENCES ? (
-        <p className="form-error" role="status">
-          You have used all {MAX_ABSENCES} allowed absences. Another absence
-          deactivates your account.
-        </p>
-      ) : null}
+      {groups.map((g) =>
+        !g.active ? (
+          <p key={g.language} className="form-error" role="status">
+            You have been removed from the {LANGUAGE_LABEL[g.language]} group.
+            Please contact the team if you think this is a mistake.
+          </p>
+        ) : g.absences_used >= MAX_ABSENCES ? (
+          <p key={g.language} className="form-error" role="status">
+            {showTag ? `${LANGUAGE_LABEL[g.language]} group: you` : "You"} have used all{" "}
+            {MAX_ABSENCES} allowed absences.{" "}
+            {groups.filter((x) => x.active).length > 1
+              ? `Another absence removes you from the ${LANGUAGE_LABEL[g.language]} group.`
+              : "Another absence deactivates your account."}
+          </p>
+        ) : null,
+      )}
 
       <div className="actions">
         <Link href="/actor/scan" className="btn-solid display">
@@ -105,6 +146,7 @@ export default async function ActorDashboardPage({
               <span className="list-main">
                 <strong>{s.title}</strong>
                 <span className="muted">
+                  {showTag ? `${LANGUAGE_LABEL[s.language as SessionLanguage]} · ` : ""}
                   {formatTime(s.starts_at)}
                   {s.location ? ` · ${s.location}` : ""} · late after{" "}
                   {formatTime(s.late_after)}

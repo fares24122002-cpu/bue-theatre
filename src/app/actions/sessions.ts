@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { ActionState } from "@/lib/action-state";
 import { cairoToDate, isDate, isTime } from "@/lib/time";
 import { isStatus } from "@/lib/session-status";
+import { isSessionLanguage } from "@/lib/types";
 
 const text = (v: FormDataEntryValue | null) =>
   typeof v === "string" ? v.trim() : "";
@@ -27,8 +28,10 @@ export async function saveSession(
   const start = text(formData.get("start"));
   const lateAfter = text(formData.get("late_after"));
   const closes = text(formData.get("closes"));
+  const language = text(formData.get("language")) || "both";
 
   if (!title) return { error: "Give the workshop a title." };
+  if (!isSessionLanguage(language)) return { error: "Choose who the workshop is for." };
   if (title.length > 120) return { error: "The title is too long." };
   if (!isDate(date)) return { error: "Choose the date." };
   if (![start, lateAfter, closes].every(isTime))
@@ -43,6 +46,7 @@ export async function saveSession(
     title,
     location: location || null,
     notes: notes || null,
+    language,
     starts_at: cairoToDate(date, start).toISOString(),
     late_after: cairoToDate(date, lateAfter).toISOString(),
     closes_at: cairoToDate(date, closes).toISOString(),

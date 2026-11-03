@@ -126,6 +126,7 @@ export function TeamMemberForm({
     bio: string | null;
     photo_url: string | null;
     sort_order: number;
+    cast_language?: string | null;
   };
 }) {
   const [state, action, pending] = useActionState(saveTeamMember, {});
@@ -148,6 +149,14 @@ export function TeamMemberForm({
             ))}
           </select>
         </div>
+      </div>
+      <div className="field">
+        <label htmlFor={`cl-${sfx}`}>Cast language (only used for the Cast group)</label>
+        <select id={`cl-${sfx}`} name="cast_language" defaultValue={m?.cast_language ?? ""}>
+          <option value="">Not set</option>
+          <option value="english">English cast</option>
+          <option value="arabic">Arabic cast</option>
+        </select>
       </div>
       <div className="field-row">
         <div className="field">

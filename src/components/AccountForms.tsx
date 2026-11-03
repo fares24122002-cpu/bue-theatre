@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { createAccount, setPassword } from "@/app/actions/accounts";
+import { createAccount, setActorGroups, setPassword } from "@/app/actions/accounts";
+import { LANGUAGES, LANGUAGE_LABEL, type Language } from "@/lib/types";
 
 /** Add an actor or staff account. */
 export function AddAccountForm() {
@@ -31,6 +32,10 @@ export function AddAccountForm() {
           </select>
         </div>
       </div>
+      <fieldset className="field group-pick">
+        <legend>Group (actors only: English, Arabic, or both)</legend>
+        <GroupChecks defaults={[]} idPrefix="new" />
+      </fieldset>
       {state.error ? (
         <p className="form-error" role="alert">
           {state.error}
@@ -67,6 +72,48 @@ export function PasswordForm({ profileId, name }: { profileId: string; name: str
       />
       <button type="submit" className="btn-outline" disabled={pending}>
         Set
+      </button>
+      {state.error ? (
+        <span className="form-error" role="alert">
+          {state.error}
+        </span>
+      ) : null}
+      {state.message ? (
+        <span className="form-ok" role="status">
+          {state.message}
+        </span>
+      ) : null}
+    </form>
+  );
+}
+
+function GroupChecks({ defaults, idPrefix }: { defaults: Language[]; idPrefix: string }) {
+  return (
+    <div className="check-row">
+      {LANGUAGES.map((l) => (
+        <label key={l} className="check" htmlFor={`${idPrefix}-${l}`}>
+          <input
+            id={`${idPrefix}-${l}`}
+            type="checkbox"
+            name="groups"
+            value={l}
+            defaultChecked={defaults.includes(l)}
+          />
+          {LANGUAGE_LABEL[l]}
+        </label>
+      ))}
+    </div>
+  );
+}
+
+/** Change which groups an actor is in. */
+export function GroupsForm({ profileId, groups }: { profileId: string; groups: Language[] }) {
+  const [state, formAction, pending] = useActionState(setActorGroups.bind(null, profileId), {});
+  return (
+    <form action={formAction} className="inline-form">
+      <GroupChecks defaults={groups} idPrefix={`g-${profileId}`} />
+      <button type="submit" className="btn-outline" disabled={pending}>
+        Save groups
       </button>
       {state.error ? (
         <span className="form-error" role="alert">
